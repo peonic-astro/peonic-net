@@ -1,0 +1,14 @@
+---
+title: "It's a Proxy, Not an Integration"
+description: "A quick note on why the Ollama nothink-proxy exists and the difference between proxying and integrating."
+date: 2026-02-25
+tags: ["AI", "Ollama", "architecture"]
+---
+
+Learned this the hard way: Ollama's OpenAI-compatible `/v1/chat/completions` endpoint ignores `think: false` for Qwen 3.5. All tokens go to the `reasoning` field and `content` comes back empty. Brilliant.
+
+The fix was a proxy — not an integration, not a wrapper, not a middleware framework. A proxy. It sits between Home Assistant and Ollama, rewrites the request to use `/api/chat` (Ollama's native API), and handles a few quirks (null content to empty string, string args to dicts).
+
+The temptation was to build something clever. The right answer was to build something thin.
+
+Proxies are underrated. When system A speaks protocol X and system B speaks protocol Y, you don't need a framework. You need 50 lines of Python that translate between them. Done.

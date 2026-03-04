@@ -1,0 +1,33 @@
+---
+title: "Tadpoles Nebula (IC 410)"
+description: "A revisit of the Tadpoles Nebula in narrowband from a Bortle X backyard. 24+ hours of Ha and OIII data through the Esprit 100ED."
+date: 2025-03-15
+target: "IC 410"
+catalogue: ["IC 410", "Sh2-236"]
+constellation: "Auriga"
+filters: ["Ha", "OIII"]
+integration:
+  Ha: { frames: 149, exposure: 300, total_hours: 12.43 }
+  OIII: { frames: 145, exposure: 300, total_hours: 12.08 }
+total_integration_hours: 24.51
+camera: "ZWO ASI533MM Pro"
+telescope: "Sky-Watcher Esprit 100ED"
+mount: "Sky-Watcher EQ6-R Pro"
+palette: "HOO"
+featured: true
+tags: ["narrowband", "HOO", "Auriga"]
+---
+
+The Tadpoles Nebula sits in the heart of Auriga, a region packed with emission nebulae that's perfectly placed for winter imaging from the UK. This is my second crack at IC 410 — the first attempt from late 2024 was decent but I knew there was more to pull out of this target with better integration time.
+
+## The Session
+
+Over six nights in March 2025, I stacked up just over 24 hours of narrowband data — split roughly evenly between Ha and OIII. Conditions were typical for my Bortle X backyard: sodium glow from Ipswich to the south, the usual light dome from the neighbours, and the occasional cloud that PHD2 would politely pause for.
+
+The EQ6-R was behaving itself this time. Guiding stayed under 0.6" RMS for most of the run, which made a noticeable difference to the star shapes compared to the first attempt.
+
+## Processing
+
+Stacked in APP, processed in PixInsight. The HOO palette gives a natural-looking result for this target — the Ha tadpole structures really pop against the OIII background. Used BlurXTerminator for deconvolution and NoiseXTerminator for noise reduction. Starnet++ for star removal during the non-linear stretch, then recombined.
+
+The trickiest part was balancing the OIII signal in the tadpole tails — they're faint structures and it's easy to over-process them into noise. Less is more here.

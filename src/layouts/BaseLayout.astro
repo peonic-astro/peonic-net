@@ -1,0 +1,158 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+}
+
+const { title, description = 'Astrophotography, projects, and tinkering by Koz.', ogImage } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="canonical" href={canonicalURL} />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- SEO -->
+    <title>{title} | Peonic</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={`${title} | Peonic`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Theme toggle: inline script prevents flash of wrong theme -->
+    <script is:inline>
+      const theme = localStorage.getItem('theme') || 'dark';
+      if (theme === 'light') document.documentElement.classList.add('light');
+    </script>
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <nav class="sticky top-0 z-50 bg-void/80 backdrop-blur-md border-b border-white/5">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <!-- Logo -->
+          <a href="/" class="text-xl font-bold tracking-tight text-white font-['Outfit']">
+            PEONIC
+          </a>
+
+          <!-- Nav links (desktop) -->
+          <div class="hidden md:flex items-center gap-6 text-sm">
+            <a href="/astrophotography" class="text-slate-dim hover:text-white transition-colors">Astrophotography</a>
+            <a href="/projects" class="text-slate-dim hover:text-white transition-colors">Projects</a>
+            <a href="/claudes-corner" class="text-slate-dim hover:text-white transition-colors">Claude's Corner</a>
+            <a href="/workshop" class="text-slate-dim hover:text-white transition-colors">Workshop</a>
+            <a href="/field-notes" class="text-slate-dim hover:text-white transition-colors">Field Notes</a>
+            <button id="theme-toggle" class="p-2 text-slate-dim hover:text-amber transition-colors" aria-label="Toggle theme">
+              <svg class="w-5 h-5 hidden dark-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <svg class="w-5 h-5 hidden light-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Mobile menu button -->
+          <button id="mobile-menu-btn" class="md:hidden p-2 text-slate-dim" aria-label="Menu">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile menu -->
+      <div id="mobile-menu" class="hidden md:hidden border-t border-white/5 bg-void/95 backdrop-blur-md">
+        <div class="px-4 py-3 space-y-2">
+          <a href="/astrophotography" class="block py-2 text-slate-dim hover:text-white">Astrophotography</a>
+          <a href="/projects" class="block py-2 text-slate-dim hover:text-white">Projects</a>
+          <a href="/claudes-corner" class="block py-2 text-slate-dim hover:text-white">Claude's Corner</a>
+          <a href="/workshop" class="block py-2 text-slate-dim hover:text-white">Workshop</a>
+          <a href="/field-notes" class="block py-2 text-slate-dim hover:text-white">Field Notes</a>
+        </div>
+      </div>
+    </nav>
+
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <footer class="border-t border-white/5 bg-void-light">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div>
+            <h3 class="text-white font-['Outfit'] font-bold text-lg mb-3">PEONIC</h3>
+            <p class="text-slate-dim text-sm">Astrophotography, AI tinkering, and assorted rabbit holes. Shot from a Bortle X backyard in Suffolk, UK.</p>
+          </div>
+          <div>
+            <h4 class="text-white font-semibold mb-3">Sections</h4>
+            <ul class="space-y-1 text-sm text-slate-dim">
+              <li><a href="/astrophotography" class="hover:text-amber transition-colors">Astrophotography</a></li>
+              <li><a href="/projects" class="hover:text-amber transition-colors">Projects</a></li>
+              <li><a href="/claudes-corner" class="hover:text-amber transition-colors">Claude's Corner</a></li>
+              <li><a href="/workshop" class="hover:text-amber transition-colors">Workshop</a></li>
+              <li><a href="/field-notes" class="hover:text-amber transition-colors">Field Notes</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-white font-semibold mb-3">Links</h4>
+            <ul class="space-y-1 text-sm text-slate-dim">
+              <li><a href="/about" class="hover:text-amber transition-colors">About</a></li>
+              <li><a href="/gear" class="hover:text-amber transition-colors">Gear</a></li>
+              <li><a href="https://github.com/peonic-astro" class="hover:text-amber transition-colors">GitHub</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="mt-8 pt-8 border-t border-white/5 text-center text-sm text-slate-dim">
+          &copy; {new Date().getFullYear()} Peonic. Built with Astro, deployed on Cloudflare Pages.
+        </div>
+      </div>
+    </footer>
+
+    <!-- Theme toggle + mobile menu scripts -->
+    <script>
+      // Theme toggle
+      const toggle = document.getElementById('theme-toggle');
+      const darkIcon = toggle?.querySelector('.dark-icon') as HTMLElement;
+      const lightIcon = toggle?.querySelector('.light-icon') as HTMLElement;
+
+      function updateIcons() {
+        const isLight = document.documentElement.classList.contains('light');
+        if (darkIcon) darkIcon.style.display = isLight ? 'block' : 'none';
+        if (lightIcon) lightIcon.style.display = isLight ? 'none' : 'block';
+      }
+
+      updateIcons();
+
+      toggle?.addEventListener('click', () => {
+        document.documentElement.classList.toggle('light');
+        const isLight = document.documentElement.classList.contains('light');
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        updateIcons();
+      });
+
+      // Mobile menu
+      const menuBtn = document.getElementById('mobile-menu-btn');
+      const menu = document.getElementById('mobile-menu');
+      menuBtn?.addEventListener('click', () => {
+        menu?.classList.toggle('hidden');
+      });
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  @import '../styles/global.css';
+</style>

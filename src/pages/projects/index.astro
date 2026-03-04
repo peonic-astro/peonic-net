@@ -1,0 +1,49 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SectionHeader from '../../components/SectionHeader.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('projects', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const statusColors: Record<string, string> = {
+  active: 'bg-emerald-500/20 text-emerald-400',
+  complete: 'bg-sky-500/20 text-sky-400',
+  archived: 'bg-slate-500/20 text-slate-400',
+  planned: 'bg-amber/20 text-amber',
+};
+---
+
+<BaseLayout title="Projects" description="AI tinkering, smart home builds, and assorted rabbit holes.">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <SectionHeader
+      title="Projects"
+      subtitle="AI tinkering, smart home builds, and whatever rabbit hole I've fallen into this week."
+    />
+
+    {posts.length > 0 ? (
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {posts.map(post => (
+          <a href={`/projects/${post.id}`} class="group block bg-void-light rounded-lg border border-white/5 hover:border-amber/30 transition-all p-6">
+            <div class="flex items-center gap-3 mb-3">
+              <h3 class="text-white font-semibold text-lg group-hover:text-amber transition-colors">{post.data.title}</h3>
+              <span class={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColors[post.data.status]}`}>
+                {post.data.status}
+              </span>
+            </div>
+            <p class="text-slate-dim text-sm mb-3">{post.data.description}</p>
+            {post.data.tech.length > 0 && (
+              <div class="flex flex-wrap gap-2">
+                {post.data.tech.map((t: string) => (
+                  <span class="text-xs bg-void rounded px-2 py-1 text-slate-dim">{t}</span>
+                ))}
+              </div>
+            )}
+          </a>
+        ))}
+      </div>
+    ) : (
+      <p class="text-slate-dim text-lg py-20 text-center">Projects showcase coming soon.</p>
+    )}
+  </div>
+</BaseLayout>

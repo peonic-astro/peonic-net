@@ -1,0 +1,97 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostCard from '../components/PostCard.astro';
+import { getCollection } from 'astro:content';
+
+// Grab all non-draft posts from every collection, sorted by date
+const allCollections = await Promise.all([
+  getCollection('astrophotography', ({ data }) => !data.draft),
+  getCollection('projects', ({ data }) => !data.draft),
+  getCollection('claudes-corner', ({ data }) => !data.draft),
+  getCollection('workshop', ({ data }) => !data.draft),
+  getCollection('field-notes', ({ data }) => !data.draft),
+]);
+
+// Tag each entry with its collection name for routing and display
+const allPosts = allCollections
+  .flatMap((entries, i) => {
+    const sections = ['astrophotography', 'projects', 'claudes-corner', 'workshop', 'field-notes'];
+    return entries.map(entry => ({ ...entry, section: sections[i] }));
+  })
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const latestPosts = allPosts.slice(0, 6);
+const featuredPost = allPosts.find(p => p.data.featured);
+---
+
+<BaseLayout title="Home">
+  <!-- Hero section -->
+  <section class="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
+    <!-- Gradient background (placeholder until hero image exists) -->
+    <div class="absolute inset-0 bg-gradient-to-b from-void via-void-light to-void"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(245,166,35,0.08),transparent_70%)]"></div>
+
+    <div class="relative z-10 text-center px-4 max-w-4xl mx-auto">
+      <h1 class="text-5xl md:text-7xl font-['Outfit'] font-extrabold text-white mb-6 tracking-tight">
+        PEONIC
+      </h1>
+      <p class="text-xl md:text-2xl text-slate-dim mb-4">
+        Astrophotography from a Bortle X backyard.
+      </p>
+      <p class="text-lg text-slate-dim/70">
+        Plus AI projects, smart home tinkering, and assorted rabbit holes.
+      </p>
+      <div class="mt-8 flex flex-wrap justify-center gap-4">
+        <a href="/astrophotography" class="px-6 py-3 bg-amber text-void font-semibold rounded-lg hover:bg-amber-light transition-colors">
+          View Gallery
+        </a>
+        <a href="/about" class="px-6 py-3 border border-white/20 text-white rounded-lg hover:border-amber/50 transition-colors">
+          About Me
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured post (if any) -->
+  {featuredPost && (
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <h2 class="text-sm font-semibold uppercase tracking-wider text-amber mb-4">Featured</h2>
+      <a href={`/${featuredPost.section}/${featuredPost.id}`} class="group block relative rounded-xl overflow-hidden bg-void-light border border-white/5 hover:border-amber/30 transition-all">
+        {featuredPost.data.hero_image && (
+          <div class="aspect-[21/9] overflow-hidden">
+            <img src={featuredPost.data.hero_image} alt={featuredPost.data.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+          </div>
+        )}
+        <div class="p-6 md:p-8">
+          <h3 class="text-2xl md:text-3xl font-['Outfit'] font-bold text-white group-hover:text-amber transition-colors mb-3">
+            {featuredPost.data.title}
+          </h3>
+          <p class="text-slate-dim text-lg max-w-2xl">{featuredPost.data.description}</p>
+        </div>
+      </a>
+    </section>
+  )}
+
+  <!-- Latest posts grid -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <h2 class="text-sm font-semibold uppercase tracking-wider text-amber mb-6">Latest</h2>
+    {latestPosts.length > 0 ? (
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {latestPosts.map(post => (
+          <PostCard
+            title={post.data.title}
+            description={post.data.description}
+            date={post.data.date}
+            href={`/${post.section}/${post.id}`}
+            section={post.section}
+            thumbnail={post.data.thumbnail}
+          />
+        ))}
+      </div>
+    ) : (
+      <div class="text-center py-20">
+        <p class="text-slate-dim text-lg">Content coming soon. The stars aren't going anywhere.</p>
+      </div>
+    )}
+  </section>
+</BaseLayout>
