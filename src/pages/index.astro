@@ -25,20 +25,26 @@ const featuredPost = allPosts.find(p => p.data.featured);
 ---
 
 <BaseLayout title="Home">
-  <!-- Hero section -->
+  <!-- Hero section with cycling background images -->
   <section class="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
-    <!-- Gradient background (placeholder until hero image exists) -->
-    <div class="absolute inset-0 bg-gradient-to-b from-void via-void-light to-void"></div>
-    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(245,166,35,0.08),transparent_70%)]"></div>
+    <!-- Hero images — stacked, crossfade via JS -->
+    <div id="hero-images" class="absolute inset-0">
+      <img src="/images/hero/bubble.jpg" alt="Bubble Nebula" class="hero-img absolute inset-0 w-full h-full object-cover opacity-100 transition-opacity duration-1000" />
+      <img src="/images/hero/tadpoles.jpg" alt="IC410 Tadpole Nebula" class="hero-img absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000" />
+      <img src="/images/hero/rosette.jpg" alt="Rosette Nebula" class="hero-img absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000" />
+      <img src="/images/hero/horsehead.jpg" alt="Horsehead Nebula" class="hero-img absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000" />
+    </div>
+    <!-- Dark overlay so text remains readable -->
+    <div class="absolute inset-0 bg-gradient-to-b from-void/60 via-void/40 to-void"></div>
 
     <div class="relative z-10 text-center px-4 max-w-4xl mx-auto">
-      <h1 class="text-5xl md:text-7xl font-['Outfit'] font-extrabold text-white mb-6 tracking-tight">
+      <h1 class="text-5xl md:text-7xl font-['Outfit'] font-extrabold text-white mb-6 tracking-tight drop-shadow-lg">
         PEONIC
       </h1>
-      <p class="text-xl md:text-2xl text-slate-dim mb-4">
-        Astrophotography from a Bortle X backyard.
+      <p class="text-xl md:text-2xl text-slate-dim mb-4 drop-shadow-md">
+        Astrophotography from Suburban Skies.
       </p>
-      <p class="text-lg text-slate-dim/70">
+      <p class="text-lg text-slate-dim/70 drop-shadow-md">
         Plus AI projects, smart home tinkering, and assorted rabbit holes.
       </p>
       <div class="mt-8 flex flex-wrap justify-center gap-4">
@@ -51,6 +57,17 @@ const featuredPost = allPosts.find(p => p.data.featured);
       </div>
     </div>
   </section>
+
+  <!-- Hero image cycling script -->
+  <script>
+    const imgs = document.querySelectorAll<HTMLImageElement>('.hero-img');
+    let current = 0;
+    setInterval(() => {
+      imgs[current].style.opacity = '0';
+      current = (current + 1) % imgs.length;
+      imgs[current].style.opacity = '1';
+    }, 6000);
+  </script>
 
   <!-- Featured post (if any) -->
   {featuredPost && (

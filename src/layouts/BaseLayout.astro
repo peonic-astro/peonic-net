@@ -94,7 +94,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <h3 class="text-white font-['Outfit'] font-bold text-lg mb-3">PEONIC</h3>
-            <p class="text-slate-dim text-sm">Astrophotography, AI tinkering, and assorted rabbit holes. Shot from a Bortle X backyard in Suffolk, UK.</p>
+            <p class="text-slate-dim text-sm">Astrophotography, AI tinkering, and assorted rabbit holes. Shot from Bortle 6 skies in Suffolk, UK.</p>
           </div>
           <div>
             <h4 class="text-white font-semibold mb-3">Sections</h4>
@@ -149,10 +149,186 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       menuBtn?.addEventListener('click', () => {
         menu?.classList.toggle('hidden');
       });
+
+      // Lightbox with zoom and pan
+      const overlay = document.getElementById('lightbox-overlay') as HTMLElement;
+      const lbImg = document.getElementById('lightbox-img') as HTMLImageElement;
+      const lbCaption = document.getElementById('lightbox-caption') as HTMLElement;
+      const lbContainer = document.getElementById('lightbox-container') as HTMLElement;
+
+      let scale = 1;
+      let panX = 0;
+      let panY = 0;
+      let isDragging = false;
+      let dragStartX = 0;
+      let dragStartY = 0;
+      let panStartX = 0;
+      let panStartY = 0;
+
+      function updateTransform() {
+        lbImg.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+      }
+
+      function resetZoom() {
+        scale = 1;
+        panX = 0;
+        panY = 0;
+        updateTransform();
+        lbImg.style.cursor = 'zoom-in';
+      }
+
+      function closeLightbox() {
+        overlay.classList.add('hidden');
+        document.body.style.overflow = '';
+        lbImg.src = '';
+        resetZoom();
+      }
+
+      document.querySelectorAll<HTMLImageElement>('.lightbox').forEach(img => {
+        img.style.cursor = 'zoom-in';
+        img.addEventListener('click', () => {
+          lbImg.src = img.src;
+          lbCaption.textContent = img.alt || '';
+          overlay.classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
+          resetZoom();
+        });
+      });
+
+      // Mouse wheel zoom
+      lbContainer?.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? 0.8 : 1.25;
+        const newScale = Math.min(Math.max(scale * delta, 1), 10);
+
+        if (newScale === 1) {
+          resetZoom();
+        } else {
+          // Zoom towards mouse position
+          const rect = lbImg.getBoundingClientRect();
+          const cx = e.clientX - rect.left - rect.width / 2;
+          const cy = e.clientY - rect.top - rect.height / 2;
+          const ratio = 1 - newScale / scale;
+          panX += cx * ratio;
+          panY += cy * ratio;
+          scale = newScale;
+          updateTransform();
+          lbImg.style.cursor = scale > 1 ? 'grab' : 'zoom-in';
+        }
+      }, { passive: false });
+
+      // Click to toggle zoom
+      lbImg?.addEventListener('click', (e) => {
+        if (isDragging) return;
+        e.stopPropagation();
+        if (scale === 1) {
+          // Zoom to 3x at click position
+          const rect = lbImg.getBoundingClientRect();
+          const cx = e.clientX - rect.left - rect.width / 2;
+          const cy = e.clientY - rect.top - rect.height / 2;
+          scale = 3;
+          panX = -cx * 2;
+          panY = -cy * 2;
+          updateTransform();
+          lbImg.style.cursor = 'grab';
+        } else {
+          resetZoom();
+        }
+      });
+
+      // Drag to pan when zoomed
+      lbImg?.addEventListener('mousedown', (e) => {
+        if (scale <= 1) return;
+        e.preventDefault();
+        isDragging = false;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        panStartX = panX;
+        panStartY = panY;
+        lbImg.style.cursor = 'grabbing';
+
+        const onMove = (ev: MouseEvent) => {
+          const dx = ev.clientX - dragStartX;
+          const dy = ev.clientY - dragStartY;
+          if (Math.abs(dx) > 3 || Math.abs(dy) > 3) isDragging = true;
+          panX = panStartX + dx;
+          panY = panStartY + dy;
+          updateTransform();
+        };
+
+        const onUp = () => {
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup', onUp);
+          lbImg.style.cursor = scale > 1 ? 'grab' : 'zoom-in';
+          // Reset isDragging after click event fires
+          setTimeout(() => { isDragging = false; }, 0);
+        };
+
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+      });
+
+      // Close on overlay background click or close button
+      overlay?.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        if (target === overlay || target === lbContainer || target.id === 'lightbox-close') {
+          closeLightbox();
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (overlay.classList.contains('hidden')) return;
+        if (e.key === 'Escape') closeLightbox();
+      });
     </script>
+
+    <!-- Lightbox overlay -->
+    <div id="lightbox-overlay" class="hidden fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center">
+      <button id="lightbox-close" class="absolute top-4 right-4 text-white/70 hover:text-white text-4xl leading-none z-10">&times;</button>
+      <div id="lightbox-container" class="flex-1 w-full flex items-center justify-center overflow-hidden">
+        <img id="lightbox-img" src="" alt="" class="max-h-[85vh] max-w-[95vw] object-contain rounded-lg transition-transform duration-150 ease-out select-none" draggable="false" />
+      </div>
+      <p id="lightbox-caption" class="text-slate-dim text-sm py-3 text-center max-w-2xl"></p>
+    </div>
   </body>
 </html>
 
 <style is:global>
   @import '../styles/global.css';
+
+  .prose {
+    line-height: 1.8;
+    font-size: 1.05rem;
+  }
+  .prose p {
+    margin-bottom: 1.5em;
+  }
+  .prose h2 {
+    color: #ffffff;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-top: 2.5em;
+    margin-bottom: 1em;
+  }
+  .prose ul, .prose ol {
+    margin-top: 1em;
+    margin-bottom: 1.5em;
+    padding-left: 1.5em;
+  }
+  .prose li {
+    margin-bottom: 0.5em;
+  }
+  .prose figure {
+    margin-top: 2em;
+    margin-bottom: 2em;
+  }
+  .prose a {
+    color: var(--color-amber);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .prose a:hover {
+    color: var(--color-amber-light);
+  }
 </style>

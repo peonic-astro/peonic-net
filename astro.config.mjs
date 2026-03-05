@@ -9,6 +9,7 @@ export default defineConfig({
   integrations: [mdx(), sitemap()],
   vite: {
     plugins: [tailwindcss()],
+    server: { allowedHosts: ['brain.lan', 'localhost', '192.168.68.5'] },
   },
   image: {
     // Sharp handles AVIF/WebP generation

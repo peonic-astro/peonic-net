@@ -8,11 +8,11 @@ const posts = (await getCollection('astrophotography', ({ data }) => !data.draft
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 ---
 
-<BaseLayout title="Astrophotography" description="Narrowband imaging from a Bortle X backyard in Suffolk, UK.">
+<BaseLayout title="Astrophotography" description="Narrowband imaging from a Bortle 6 backyard in Suffolk, UK.">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <SectionHeader
       title="Astrophotography"
-      subtitle="Narrowband imaging from a Bortle X backyard in Suffolk, UK. Ha, OIII, SII — photon by photon."
+      subtitle="Narrowband imaging from a Bortle 6 backyard in Suffolk, UK. Ha, OIII, SII — photon by photon."
     />
 
     {posts.length > 0 ? (

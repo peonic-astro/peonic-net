@@ -1,0 +1,171 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="About" description="Astrophotographer, infrastructure nerd, and AI tinkerer from Suffolk, UK.">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+    <!-- Header with portrait -->
+    <div class="mb-12">
+      <h1 class="text-4xl md:text-5xl font-['Outfit'] font-extrabold text-white mb-6">About Me</h1>
+      <div class="flex flex-col md:flex-row items-center md:items-start gap-6">
+        <img
+          src="/images/koz.jpg"
+          alt="Chris Belton"
+          class="w-28 h-28 rounded-full object-cover border-2 border-amber/30 shadow-lg flex-shrink-0"
+        />
+        <p class="text-xl text-slate-dim leading-relaxed">
+          I'm Chris — most people online know me as <strong class="text-white">Koz</strong>. I'm a 50-something-IT-guy from Suffolk, UK, who photographs the night sky from his back garden and fills the rest of his time building things with AI and electronics that probably don't need to exist.
+        </p>
+      </div>
+    </div>
+
+    <!-- The Astro Story -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-['Outfit'] font-bold text-white mb-4">The Astrophotography</h2>
+      <div class="space-y-4 text-slate-bright leading-relaxed">
+        <p>
+          I first pointed a camera at the sky back around 2007. A colleague showed me some wobbly images of Saturn captured through a little Meade ETX telescope with a cannibalised webcam, and that was it — I was hooked. I scraped together a second-hand Vixen mount, a small 80mm refractor, and sent my Canon DSLR off to have its IR filter removed. The results were modest, but the obsession was immediate.
+        </p>
+        <p>
+          Then life happened. Young family, long commute, and the uncomfortable discovery that I <em>really</em> don't like being cold. The gear got sold off and astrophotography went on a 15-year hiatus.
+        </p>
+        <p>
+          Fast forward to the Covid lockdown of 2020 and a afternoon spent going down a YouTube rabbit hole, and the realisation that modern setups can be controlled remotely from the warmth of the house. In April 2022 the bank balance took its first serious hit, and I haven't stopped since. Multiple imaging rigs, narrowband filters, automated everything (the gear page is probably out of date by the time you read this).
+        </p>
+        <p>
+          I shoot from Bortle 6 skies in suburban Suffolk. It's not dark, ut with narrowband filters (Ha, OIII, SII) and enough integration time, you can pull out targets that have no business being visible from a back garden. That's the whole point of this site — proving you don't need a mountaintop observatory or a telescope mounted on a satellite to do this.
+        </p>
+      </div>
+    </section>
+
+    <!-- The Day Job -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-['Outfit'] font-bold text-white mb-4">The Day Job</h2>
+      <div class="space-y-4 text-slate-bright leading-relaxed">
+        <p>
+          By day I'm an IT Director at a Cambridge-based game studio. I've spent my career in systems, networking, and keeping things running — not writing code. But I'm deeply technical on the infrastructure side, and that itch to build things has bled into everything else.
+        </p>
+      </div>
+    </section>
+
+    <!-- The AI Tinkering -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-['Outfit'] font-bold text-white mb-4">The AI Rabbit Hole</h2>
+      <div class="space-y-4 text-slate-bright leading-relaxed">
+        <p>
+          What started as curiosity about local LLMs has turned into... well, a collection of projects that my wife describes as "your computer things." Some highlights:
+        </p>
+        <ul class="list-disc list-inside space-y-2 ml-4">
+          <li>
+            <strong class="text-white">The OverClaude</strong> — a persistent meta-Claude that manages all my projects. It has institutional memory, dispatches worker sessions, and is basically a digital project manager that never sleeps.
+          </li>
+          <li>
+            <strong class="text-white">Mrs Wingate</strong> — a voice assistant with the personality of a sharp-tongued Edwardian housekeeper, running on a local LLM and voiced by an ElevenLabs clone. She controls the smart home, judges your life choices, and has strong opinions about the chickens.
+          </li>
+          <li>
+            <strong class="text-white">Claude-Pierre</strong> — a Telegram bot and AI sommelier. He fetches information, manages wine recommendations, and acts as a concierge between me and the AI systems. Very French. Very judgemental about your wine choices.
+          </li>
+          <li>
+            <strong class="text-white">Haiku-san</strong> — the infrastructure monitor. Watches over the network, services, and devices, and reports back in haiku when something goes wrong. Because why have boring alerts?
+          </li>
+        </ul>
+        <p>
+          I run all of this from a workstation in the loft. The house has 60+ smart devices, a full Home Assistant setup, and a WiFi network called ChickenLand. It's exactly as chaotic as it sounds.
+        </p>
+      </div>
+    </section>
+
+    <!-- The Team -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-['Outfit'] font-bold text-white mb-4">Meet the Team</h2>
+      <p class="text-slate-bright leading-relaxed mb-6">
+        Each project has its own AI persona with a distinct personality. They're dispatched with relevant context, do their work, and their session transcripts get curated back into the shared knowledge base. It's a hive mind run by a man who names his cat Michael Biscuits.
+      </p>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div class="text-center">
+          <img src="/images/team-overclaude.png" alt="The OverClaude" class="w-24 h-24 rounded-full object-cover mx-auto mb-2 border border-amber/20" />
+          <h3 class="text-white font-semibold text-sm">The OverClaude</h3>
+          <p class="text-slate-dim text-xs">Project Manager</p>
+        </div>
+        <div class="text-center">
+          <img src="/images/team-wingate.jpeg" alt="Mrs Wingate" class="w-24 h-24 rounded-full object-cover mx-auto mb-2 border border-amber/20" />
+          <h3 class="text-white font-semibold text-sm">Mrs Wingate</h3>
+          <p class="text-slate-dim text-xs">Head of Household</p>
+        </div>
+        <div class="text-center">
+          <img src="/images/team-haiku-san.png" alt="Haiku-san" class="w-24 h-24 rounded-full object-cover mx-auto mb-2 border border-amber/20" />
+          <h3 class="text-white font-semibold text-sm">Haiku-san</h3>
+          <p class="text-slate-dim text-xs">Infrastructure Monitor</p>
+        </div>
+        <div class="text-center">
+          <img src="/images/team-claude-pierre.jpeg" alt="Claude-Pierre" class="w-24 h-24 rounded-full object-cover mx-auto mb-2 border border-amber/20" />
+          <h3 class="text-white font-semibold text-sm">Claude-Pierre</h3>
+          <p class="text-slate-dim text-xs">AI Sommelier</p>
+        </div>
+        <div class="text-center">
+          <img src="/images/team-greybeard.jpeg" alt="Greybeard" class="w-24 h-24 rounded-full object-cover mx-auto mb-2 border border-amber/20" />
+          <h3 class="text-white font-semibold text-sm">Greybeard</h3>
+          <p class="text-slate-dim text-xs">Code Projects</p>
+        </div>
+        <div class="text-center">
+          <img src="/images/team-haus.jpeg" alt="Haus Claude" class="w-24 h-24 rounded-full object-cover mx-auto mb-2 border border-amber/20" />
+          <h3 class="text-white font-semibold text-sm">Haus Claude</h3>
+          <p class="text-slate-dim text-xs">Home Automation</p>
+        </div>
+        <div class="text-center">
+          <img src="/images/team-matt.jpeg" alt="Matt" class="w-24 h-24 rounded-full object-cover mx-auto mb-2 border border-amber/20" />
+          <h3 class="text-white font-semibold text-sm">Matt</h3>
+          <p class="text-slate-dim text-xs">Dungeon Master</p>
+        </div>
+        <div class="text-center">
+          <img src="/images/team-carl.jpeg" alt="Carl" class="w-24 h-24 rounded-full object-cover mx-auto mb-2 border border-amber/20" />
+          <h3 class="text-white font-semibold text-sm">Carl</h3>
+          <p class="text-slate-dim text-xs">Astro Tooling</p>
+        </div>
+        <div class="text-center">
+          <img src="/images/team-rembrandt.png" alt="Claude-Rembrandt" class="w-24 h-24 rounded-full object-cover mx-auto mb-2 border border-amber/20" />
+          <h3 class="text-white font-semibold text-sm">Claude-Rembrandt</h3>
+          <p class="text-slate-dim text-xs">Art Director</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Netmoji Dashboard -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-['Outfit'] font-bold text-white mb-4">The Network</h2>
+      <p class="text-slate-bright leading-relaxed mb-4">
+        60+ devices, one flat subnet, and a custom network dashboard built with Claude that monitors every last smart plug and voice satellite. This is Netmoji — real-time status for ChickenLand.
+      </p>
+      <img
+        src="/images/netmoji-cropped.png"
+        alt="Netmoji network dashboard showing all devices on the ChickenLand network"
+        class="rounded-xl border border-white/10 shadow-lg max-w-md mx-auto"
+      />
+    </section>
+
+    <!-- The Household -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-['Outfit'] font-bold text-white mb-4">The Household</h2>
+      <div class="space-y-4 text-slate-bright leading-relaxed">
+        <p>
+          I share all of this with my wife Jessica, two horses (Marvin and Ludo), a dog called Tuna, a cat called Michael Biscuits, and roughly ten chickens. If you're wondering about the WiFi name, now you know.
+        </p>
+      </div>
+    </section>
+
+    <!-- Get in Touch -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-['Outfit'] font-bold text-white mb-4">Get in Touch</h2>
+      <div class="space-y-4 text-slate-bright leading-relaxed">
+        <p>
+          I'm always happy to chat about astrophotography, AI tinkering, or any of the projects on this site. The learning curves in some of these hobbies are brutal — if you're stuck on something, reach out. I've made most of the mistakes already so you don't have to.
+        </p>
+        <p>
+          <a href="mailto:peonic@gmail.com" class="text-amber hover:text-amber-light transition-colors">peonic@gmail.com</a>
+        </p>
+      </div>
+    </section>
+
+  </div>
+</BaseLayout>

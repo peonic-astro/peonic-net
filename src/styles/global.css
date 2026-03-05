@@ -29,7 +29,7 @@ html.light body {
   color: #1e293b;
 }
 
-/* Prose styles for markdown content */
+/* Prose CSS vars */
 .prose {
   --tw-prose-body: var(--color-slate-bright);
   --tw-prose-headings: #ffffff;
