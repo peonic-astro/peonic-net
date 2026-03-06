@@ -15,8 +15,8 @@ const d = post.data;
 <BaseLayout title={d.title} description={d.description}>
   <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     {d.hero_image && (
-      <div class="rounded-xl overflow-hidden mb-8">
-        <img src={d.hero_image} alt={d.title} class="w-full" />
+      <div class="rounded-xl overflow-hidden mb-8 aspect-[3/1]">
+        <img src={d.hero_image} alt={d.title} class="w-full h-full object-cover" />
       </div>
     )}
 

@@ -4,16 +4,22 @@ interface Props {
   title: string;
   description: string;
   date: Date;
+  hero_image?: string;
   tags?: string[];
 }
 
 import BaseLayout from './BaseLayout.astro';
 
-const { title, description, date, tags = [] } = Astro.props;
+const { title, description, date, hero_image, tags = [] } = Astro.props;
 ---
 
 <BaseLayout title={title} description={description}>
   <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    {hero_image && (
+      <div class="rounded-xl overflow-hidden mb-8 aspect-[3/1]">
+        <img src={hero_image} alt={title} class="w-full h-full object-cover" />
+      </div>
+    )}
     <header class="mb-8">
       <h1 class="text-4xl md:text-5xl font-['Outfit'] font-bold text-white mb-4">{title}</h1>
       <div class="flex flex-wrap items-center gap-3 text-sm text-slate-dim">
