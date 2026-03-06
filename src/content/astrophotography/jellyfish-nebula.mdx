@@ -1,0 +1,55 @@
+---
+title: "Jellyfish Nebula (IC 443)"
+description: "Two windy nights, three processing attempts, and a supernova remnant I'm still not entirely happy with. This is the one I worked hardest for."
+date: 2023-01-12
+target: "IC 443"
+catalogue: ["IC 443", "Jellyfish Nebula", "Sharpless 248"]
+constellation: "Gemini"
+filters: ["Ha", "OIII", "SII"]
+integration:
+  Ha: { frames: 45, exposure: 300, total_hours: 3.75 }
+  OIII: { frames: 18, exposure: 300, total_hours: 1.50 }
+  SII: { frames: 18, exposure: 300, total_hours: 1.50 }
+total_integration_hours: 6.75
+camera: "ZWO ASI533MM Pro"
+telescope: "William Optics FLT91"
+mount: "Sky-Watcher EQ6-R Pro"
+palette: "SHO"
+hero_image: "/images/astro/jellyfish-v3.jpg"
+tags: ["narrowband", "SHO", "Gemini", "supernova remnant"]
+---
+
+IC 443 beat me up. Two nights of gusts to 30mph, three complete restarts in processing, and I'm still not sure I've got it right. Here are three versions anyway.
+
+## The Target
+
+The Jellyfish Nebula is a supernova remnant — the expanding debris cloud from a star that exploded somewhere between 3,000 and 30,000 years ago, about 5,000 light years away in Gemini. Unlike emission nebulae (which glow because of radiation from embedded stars), supernova remnants glow from the shockwave colliding with surrounding interstellar gas. The interaction is violent at the molecular level: the shockwave heats gas to millions of degrees and compresses it, creating the filamentary, lumpy structure that gives IC 443 its distinctive shape.
+
+At its centre sits a pulsar — the rapidly spinning neutron star core left behind by the original supernova. It spins roughly 7 times per second and emits a jet of particles that's actually carved a small bow shock into the surrounding nebula.
+
+## The Acquisition
+
+Two nights. Winds gusting to 30mph, which plays absolute havoc with autoguiding — every gust sends a ripple through the mount, and the guiding system spends its time correcting for wind shake rather than tracking. I kept going because clear nights are precious, and wind-affected data is still better than no data.
+
+The Ha signal is strong. The OIII is fainter and the filamentary structure is harder to coax out without over-processing into mush. Getting the colours to sit naturally without the SII turning everything muddy took a lot of iteration.
+
+<figure>
+  <img src="/images/astro/jellyfish-v1.jpg" alt="IC 443 Jellyfish Nebula — version 1, SHO narrowband" class="lightbox rounded-xl w-full" />
+  <figcaption class="text-slate-dim text-sm mt-2 text-center">Version 1 — first complete processing pass. Showing the overall structure of the remnant.</figcaption>
+</figure>
+
+<figure>
+  <img src="/images/astro/jellyfish-v2.jpg" alt="IC 443 Jellyfish Nebula — version 2, adjusted processing" class="lightbox rounded-xl w-full" />
+  <figcaption class="text-slate-dim text-sm mt-2 text-center">Version 2 — pulled more OIII detail out of the filaments. The jellyfish silhouette becomes clearer with more blue channel.</figcaption>
+</figure>
+
+<figure>
+  <img src="/images/astro/jellyfish-v3.jpg" alt="IC 443 Jellyfish Nebula — version 3, final processing" class="lightbox rounded-xl w-full" />
+  <figcaption class="text-slate-dim text-sm mt-2 text-center">Version 3 — closest to what I had in my head. Still not quite right. Every reprocessing pass teaches me something.</figcaption>
+</figure>
+
+## The Ongoing Battle
+
+I gave up and restarted the processing at least three times. The bright star in the middle-right of the frame was the main aggressor — it bleeds into the surrounding nebula during the non-linear stretch and is genuinely fiddly to manage without losing the surrounding structure.
+
+This is one I'll return to. More OIII data would help significantly — the current OIII integration is less than half the Ha, and that imbalance shows in the final colour. Better seeing conditions than "30mph gust simulator" would also be welcome.
