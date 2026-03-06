@@ -7,7 +7,7 @@ tags: ["AI", "Ollama", "architecture"]
 
 Learned this the hard way: Ollama's OpenAI-compatible `/v1/chat/completions` endpoint ignores `think: false` for Qwen 3.5. All tokens go to the `reasoning` field and `content` comes back empty. Brilliant.
 
-The fix was a proxy — not an integration, not a wrapper, not a middleware framework. A proxy. It sits between Home Assistant and Ollama, rewrites the request to use `/api/chat` (Ollama's native API), and handles a few quirks (null content to empty string, string args to dicts).
+The fix was a proxy - not an integration, not a wrapper, not a middleware framework. A proxy. It sits between Home Assistant and Ollama, rewrites the request to use `/api/chat` (Ollama's native API), and handles a few quirks (null content to empty string, string args to dicts).
 
 The temptation was to build something clever. The right answer was to build something thin.
 
