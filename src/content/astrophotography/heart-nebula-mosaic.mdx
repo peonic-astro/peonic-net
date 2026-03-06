@@ -1,0 +1,42 @@
+---
+title: "Heart Nebula — First Mosaic (IC 1805)"
+description: "My first mosaic attempt — four panels stitched together in PixInsight, 5 hours of L-Enhance data, and the first image I was genuinely proud of."
+date: 2022-09-16
+target: "IC 1805"
+catalogue: ["IC 1805", "Heart Nebula", "Sharpless 190", "Melotte 15"]
+constellation: "Cassiopeia"
+filters: ["L-Enhance"]
+integration:
+  L-Enhance: { frames: 61, exposure: 300, total_hours: 5.08 }
+total_integration_hours: 5.08
+camera: "ZWO ASI533MC Pro"
+telescope: "Sky-Watcher ED80"
+mount: "Sky-Watcher HEQ5 Pro"
+palette: "HOO"
+hero_image: "/images/astro/placeholder.jpg"
+tags: ["narrowband", "HOO", "Cassiopeia", "emission nebula", "mosaic", "first-mosaic"]
+---
+
+<!-- IMAGE NEEDED: Heart Nebula IC 1805 mosaic — 4-panel image from Sept 2022 with SW ED80 and 533MC Pro. -->
+
+The ZWO ASI533MC Pro has a small sensor — great for smaller targets, but a limitation when you want to capture a sprawling emission nebula that covers several degrees of sky. Rather than buying a bigger sensor (expensive) or accepting a smaller field of view (unsatisfying), I learned to mosaic.
+
+## The Problem With Small Sensors
+
+The Heart Nebula spans about 2.5° × 2.5° of sky. At the focal length of the SkyWatcher ED80, my sensor covers roughly 1° × 1°. I'd need to photograph four overlapping panels and stitch them together to capture the whole thing.
+
+PixInsight has a tool for this — PhotometricMosaic — that aligns and blends panels using the star fields as reference points. In theory, straightforward. In practice: several days of failed attempts before I got it right. The key is overlap: adjacent panels need enough shared sky that the stitch algorithm has plenty of reference stars to work with. I kept underestimating how much overlap was needed.
+
+When it finally worked, it was deeply satisfying.
+
+## The Result
+
+Four panels, each 15 five-minute subs through the Optolong L-Enhance dual narrowband filter. Total: about 5 hours of integration across the full mosaic. Zoom in close and you can still find the panel joins if you know where to look — the calibration across panels is never perfectly uniform — but at normal viewing distances it reads as a single coherent image.
+
+The Heart Nebula (IC 1805) is in Cassiopeia, about 7,500 light years away. The "heart" shape is formed by stellar winds from the young cluster Melotte 15 at its centre, which has blown a cavity in the surrounding molecular cloud over about 1.5 million years. The nebula's edges and pillars are where the gas is densest and most actively ionised.
+
+## The Moment I Got Serious
+
+This was the first image where I looked at the result and thought: *this is what I'm trying to do.* Not "good for a backyard effort" or "impressive considering the equipment" — just a properly composed, genuinely pretty astrophotograph.
+
+It led directly to the [Heart Nebula Redux](/astrophotography/heart-nebula-redux) reprocessing a few months later, after I'd accumulated more skills and better tools. The data is still good. It keeps giving.

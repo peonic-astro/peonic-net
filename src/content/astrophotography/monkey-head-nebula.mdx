@@ -1,0 +1,46 @@
+---
+title: "Peter Reid Has a... (NGC 2174)"
+description: "First night with a mono camera. 9.5 hours of narrowband on the Monkey Head Nebula — and a completely automated imaging session while I slept indoors."
+date: 2022-12-17
+target: "NGC 2174"
+catalogue: ["NGC 2174", "NGC 2175", "Monkey Head Nebula", "Sharpless 252"]
+constellation: "Orion"
+filters: ["Ha", "OIII", "SII"]
+integration:
+  Ha: { frames: 34, exposure: 300, total_hours: 2.83 }
+  OIII: { frames: 40, exposure: 300, total_hours: 3.33 }
+  SII: { frames: 40, exposure: 300, total_hours: 3.33 }
+total_integration_hours: 9.50
+camera: "ZWO ASI533MM Pro"
+telescope: "William Optics FLT91"
+mount: "Sky-Watcher EQ6-R Pro"
+palette: "SHO"
+hero_image: "/images/astro/placeholder.jpg"
+tags: ["narrowband", "SHO", "FORAXX", "Orion", "emission nebula", "first-mono"]
+---
+
+<!-- IMAGE NEEDED: Monkey Head Nebula NGC 2174 — first mono camera image, Dec 2022. SHO/FORAXX palette. -->
+
+I opened my wallet again. This time for a monochrome camera. Here's the thing: it was absolutely worth it.
+
+## The Upgrade
+
+One-shot colour cameras are wonderful — one camera, one set of data, straightforward workflow. But they have a fundamental limitation: each pixel is filtered for either red, green, or blue. You're throwing away two-thirds of the incoming light on every pixel, always.
+
+A monochrome camera has no colour filter array. Every pixel captures every photon. Paired with separate narrowband filters (shooting Ha separately, then OIII, then SII), you get significantly more signal per filter pass — and no interpolation or demosaicing to degrade the data. The image quality ceiling is substantially higher.
+
+The ZWO ASI533MM Pro is the monochrome version of the colour camera I'd been using. Same sensor architecture, same cooling, but mono. Requires shooting each filter separately and combining in processing. More complex workflow, considerably better results.
+
+## First Light
+
+The Monkey Head Nebula (NGC 2174) is an emission nebula in Orion, about 6,400 light years away. The "head" shape is formed by dark dust lanes silhouetting against the glowing hydrogen gas, with an embedded star cluster (NGC 2175) providing the ionising radiation. The morphology is similar to the Orion Nebula but less dramatic — which is fine, because almost everything is less dramatic than the Orion Nebula.
+
+For a first mono camera image, I went with SHO (Sulphur, Hydrogen, Oxygen) palette — sometimes called the Hubble Palette because it's the same approach used by the Hubble Space Telescope's narrowband imaging. I also processed it with the FORAXX variant, which produces cooler tones. The FORAXX version is what I shared at the time.
+
+## The Automation
+
+9.5 hours of data. In a single night. While I slept.
+
+This was the point where my setup became genuinely automated: the scopes sit outside under all-weather covers permanently, the imaging sequence runs unattended from NINA, and if the weather forecast checks out, I start the session and go to bed. PHD2 handles guiding. NINA handles sequencing, focusing, filter changes. I check in via remote connection occasionally, but mostly it just runs.
+
+Getting to 9.5 hours of integration on a single target in one night would have been impossible without this. It's one of the things that completely changed the hobby for me — instead of standing outside in the cold managing things manually, I'm warm, rested, and wake up to data.
