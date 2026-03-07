@@ -1,0 +1,126 @@
+---
+title: "Haus"
+description: "A multi-phase project to document, organise, and automate a 700+ entity smart home - from network infrastructure and voice assistants to a housekeeper AI with opinions."
+date: 2025-12-01
+status: "active"
+tech: ["Home Assistant", "ESPHome", "Ollama", "AdGuard", "Tailscale", "Docker"]
+featured: false
+tags: ["smart home", "automation", "voice", "infrastructure"]
+hero_image: "/images/projects/haus-hero.jpeg"
+---
+
+import { Image } from 'astro:assets';
+
+## The House That Wouldn't Stay Dumb
+
+It started with a few smart bulbs. Then a voice assistant. Then cameras. Then a managed switch, a dedicated DNS server, a NAS, three presence-detection satellites, and a voice pipeline running through a locally-hosted large language model with the personality of a disapproving Edwardian housekeeper.
+
+Haus is the project that ties it all together - a multi-phase effort to document, organise, and automate a residential smart home that's grown to over 700 entities in Home Assistant. It covers everything from network infrastructure and DNS management to voice control, security cameras, power management, and the AI personality that runs the whole show.
+
+I'd tried to get Home Assistant into shape before, on my own. It didn't go well. Over 700 entities across dozens of integrations, half of them with cryptic auto-generated names, dashboards that only made sense to me (and barely even then). Then a network failure shifted a chunk of devices to new IP addresses, breaking integrations left and right. And then it happened again. I kept patching things up but the whole setup was held together with hope and YAML. Using Claude to systematically work through every entity, every automation, every broken integration turned what was genuinely a half-baked mess into a system that actually works. More importantly, it passes the Wife Acceptance Test - Jessica can control the lights, the music, and the heating without calling me for help. That's the real benchmark.
+
+## The Network
+
+## What We're Working With
+
+The home network runs on a flat subnet serving around 60 devices over a mix of 2.5Gbps wired Ethernet and WiFi 7 mesh. The backbone is a managed 2.5Gbps switch handling the wired devices, with mesh WiFi nodes providing coverage throughout the house and garden.
+
+Three SSIDs keep things organised: a primary network for personal devices, a 6GHz band for high-bandwidth work, and a dedicated IoT network for smart home devices that don't need (and shouldn't have) access to everything else.
+
+A dedicated mini PC runs the internal services stack:
+
+- **DNS ad-blocking** via AdGuard Home - every device on the network gets ad-free browsing and local `.lan` hostname resolution without touching the router
+- **Uptime monitoring** via Uptime Kuma - 42 monitors watching every service and device
+- **Dashboard** via Homer - a landing page with quick links to every web UI on the network
+- **Remote access** via Tailscale - a subnet router that lets me access the entire home network securely from anywhere, complete with DNS resolution for local hostnames
+
+The fibre connection delivers 1.6Gbps, which is frankly excessive for a household - but it means the astrophotography uploads don't compete with the streaming, and the LLM inference server can pull model weights without saturating anything.
+
+## Why Self-Host DNS?
+
+Running your own DNS server on a home network is one of those upgrades that seems unnecessary until you do it, then you can't imagine going back. Every device gets a memorable hostname (`brain.lan`, `haus.lan`, `nas.lan`) instead of bare IP addresses. Ad-blocking happens at the network level - no browser extensions needed, works on every device including phones and smart TVs. And upstream DNS goes through encrypted DNS-over-HTTPS to a privacy-respecting provider, so the ISP doesn't get to log every domain lookup.
+
+The downside: if the DNS server goes down, the entire house loses internet. Which is why it's on a UPS, monitored by two independent systems, and I get a Telegram alert within 15 seconds of it going offline.
+
+## Home Assistant
+
+## 700+ Entities and Counting
+
+Home Assistant is the brain of the smart home. Running on a dedicated Intel NUC, it manages:
+
+- **Lighting** - Philips Hue bulbs across multiple rooms, with automations for wake-up routines, bedtime sequences, and presence-based control
+- **Climate** - Air conditioning units in the kitchen/diner and master bedroom, controllable by voice and automation
+- **Security** - Six IP cameras with motion detection, person detection, and automated floodlight triggers. A security mode that arms automatically when the house goes dark at night
+- **Power management** - Smart plugs on every major device, with automated shutdown schedules, power monitoring, and one-button start/stop from the dashboard
+- **Media** - Sonos speakers throughout the house, integrated with the voice assistant
+- **Presence detection** - WiFi-based tracking via the mesh system plus mmWave radar sensors in three rooms for room-level accuracy
+
+## Power Dashboard
+
+Every significant device has a smart plug between it and the wall. Not for energy monitoring (though that's a bonus) - for remote power control. The gaming PC, the media server, the sim racing rig, and the inference server can all be started up or shut down from a phone.
+
+The media server has an overnight automation: at 11pm, it checks whether the sitting room lights or speakers are still active. If they are, it waits and rechecks every 15 minutes. Once everything's quiet, it does a graceful shutdown via SSH and cuts the smart plug power. It boots itself back up when the plug powers on the next morning.
+
+## Security
+
+The security system runs entirely on-device with no cloud dependency. Six cameras stream locally, with motion and person detection triggering automations:
+
+- **Night motion** on outdoor cameras triggers floodlights and phone notifications (between 11pm and 6am, only when all lights are already off)
+- **Person detection** on indoor cameras triggers notifications when everyone's away from home
+- **Security mode** arms automatically 15 minutes after the last light turns off at night, and disarms at 5am
+
+The cameras run on a local integration that avoids cloud subscriptions. Everything stays on the network - no video leaving the house, no monthly fees.
+
+## The Voice Assistant
+
+The crown jewel of the smart home is Mrs Wingate - a voice assistant with the personality of a stern but caring Edwardian housekeeper. Think Professor McGonagall running your house. She calls me "Mr Belton," my wife "Jellybean," and has opinions about whether it's too late for coffee.
+
+She's not Alexa. She's not Siri. She runs entirely locally on a dedicated inference server with a 32GB GPU, powered by a 27-billion parameter open-source language model. The voice pipeline:
+
+1. **Wake word detection** - Three ESP32-S3-BOX-3 devices deployed as voice satellites (office, sitting room, kitchen). They listen for the wake word using on-device processing - no audio leaves the device until the wake word triggers
+2. **Speech-to-text** - Audio streams to a local Whisper instance running on GPU. Transcription takes under a second
+3. **Language model** - The transcript goes to the locally-hosted LLM with Mrs Wingate's personality prompt and access to Home Assistant's entity state. She understands context, remembers what room you're in, and can control any device in the house
+4. **Text-to-speech** - The response is synthesised using a cloned voice (via ElevenLabs API) that sounds like a certain beloved British actress. A local fallback voice handles responses if the API is unavailable
+
+The result is a voice assistant that understands natural language, has genuine personality, knows the state of every device in the house, and keeps all speech processing local except for the final voice synthesis.
+
+## Why Local?
+
+Privacy is the obvious answer, but it's not the main one. The main advantage is *control*. When the voice assistant runs on your own hardware, you can:
+
+- **Customise the personality** at the prompt level - Mrs Wingate has been through five iterations, each refining how she responds to different situations
+- **Add capabilities** without waiting for a manufacturer - web search, custom tools, and integrations are added by editing configuration files
+- **Debug issues yourself** - when something breaks, the logs are on your server, not behind a support ticket
+- **Keep it running during internet outages** - the local LLM and STT pipeline work without any internet connection. Only the premium voice synthesis needs connectivity, and there's a local fallback
+
+## Room-Level Presence
+
+The ESP32 satellites do double duty. Beyond voice processing, each one has an mmWave radar sensor that detects human presence without cameras. Combined with WiFi-based tracking from the mesh system, the assistant knows which room you're in and can tailor responses accordingly.
+
+"Turn off the lights" in the office turns off the office lights. The same command in the kitchen turns off the kitchen lights. No need to specify - she knows where you are.
+
+## The Roadmap
+
+Haus is an ongoing project with phases that build on each other:
+
+1. **Network Discovery** *(near complete)* - Document every device, assign static IPs to infrastructure, map the physical layout
+2. **Network Hygiene** *(complete)* - Smart plugs on everything, power management automations, remote access, garden WiFi coverage
+3. **Home Assistant Rebuild** *(in progress)* - Migrate automations from individual device bridges to HA-native, consolidate cameras, build proper dashboards, presence detection
+4. **Guest Experience** *(planned)* - A QR-code-to-dashboard flow so guests can control lights and music without downloading an app or learning a voice command
+5. **Star Trek Computer** *(in progress)* - The voice assistant buildout. ESP32 satellites, local LLM, personality development, proactive announcements
+
+## The Kitchen Skylight
+
+The current mini-project is automating an electric skylight in the kitchen. The skylight has a simple RF remote (433MHz), so the plan is to clone the remote's signals using an ESP32 with a 433MHz transmitter module, expose it as a cover entity in Home Assistant, and automate it - close when the air conditioning turns on, open on nice mornings, that sort of thing.
+
+It's the kind of project that perfectly captures what Haus is about: taking something that works fine manually and making it just a little bit smarter, one device at a time.
+
+## Lessons Learned
+
+**Always validate configuration before restarting Home Assistant.** A bad config restart takes the entire smart home offline for about 30 seconds. That means no lights, no voice assistant, no automations. In a house where the lights are automated, 30 seconds of darkness is noticeable. Config validation catches 95% of issues before they become problems.
+
+**Physical switches and smart bulbs don't mix.** Wall switches that cut power to smart bulbs are the bane of every smart home. The bulb can't respond to automations when it has no power. The fix is either smart switches that maintain power to the bulb, or very clear instructions to guests about which switches not to touch.
+
+**Presence detection needs multiple sources.** WiFi tracking tells you who's home but not which room. mmWave radar tells you which room but not who. Combining both gives room-level, person-level presence that actually works. Single-source presence detection always has blind spots.
+
+**Run your own DNS.** It's the single most impactful infrastructure upgrade you can make to a home network. Ad-blocking, local hostnames, encrypted upstream queries, and the ability to see exactly what every device on your network is trying to talk to.

@@ -1,0 +1,121 @@
+---
+title: "Haiku-san"
+description: "A Telegram receptionist bot that triages messages, queries a knowledge database, and relays requests to the OverClaude. Powered by a locally-hosted LLM with a personality all its own."
+date: 2026-03-01
+status: "active"
+tech: ["Python", "Telegram Bot API", "Ollama", "SQLite"]
+featured: false
+tags: ["AI", "chatbot", "infrastructure", "Telegram"]
+hero_image: "/images/projects/haiku-san-hero.jpeg"
+---
+
+import { Image } from 'astro:assets';
+
+## The Front Desk
+
+Every operation needs a receptionist. Someone who answers the phone, knows who to route calls to, and politely but firmly tells cold callers to go away. Haiku-san is that receptionist - a Telegram bot that sits between me and the [OverClaude](/projects/the-overclaude), triaging messages so the orchestrator only gets bothered with things that actually matter.
+
+The name is exactly what it sounds like. Haiku-san is a Japanese-inspired concierge - think ryokan front desk meets cyberpunk lobby gatekeeper. Efficient, slightly formal, warm underneath. Addresses me as "Koz-san." Drops an occasional haiku when it genuinely fits. Dry, understated humour. Its philosophy is simple: *"I am the front desk, not the architect."*
+
+## Why Build a Receptionist?
+
+The OverClaude is a powerful orchestrator, but it runs as a terminal session on a dedicated server. When I'm away from my desk - out with the horses, fishing, at work - I can't just open a terminal and talk to it. But I always have my phone, and Telegram works everywhere.
+
+The naive solution would be to pipe Telegram messages straight to Claude. But that's expensive, slow, and wastes the orchestrator's attention on things that don't need it. Most of what I want to do from my phone falls into a few categories:
+
+- **Quick questions** about projects, infrastructure, or decisions we've made - things that are already in the knowledge database
+- **Reminders to store something** - a thought, a decision, something to remember for later
+- **Actual requests** that need the OverClaude's attention - task dispatches, complex queries, things requiring judgement
+
+Haiku-san handles the first two categories entirely on its own, and only escalates the third.
+
+## How It Works
+
+### Intent Classification
+
+Every message that isn't a command gets classified by a locally-hosted large language model into one of four intents:
+
+| Intent | What Happens |
+|--------|-------------|
+| **query** | Haiku-san searches the knowledge database directly and returns the answer |
+| **remember** | Stores the information in the knowledge database for future reference |
+| **relay** | Queues the message for the OverClaude to pick up and respond to |
+| **chat** | Conversational response - small talk, banter, general questions |
+
+The LLM runs on a dedicated inference server at home, so there's no cloud API cost for the classification step. The same model handles both intent classification and conversational responses, keeping the persona consistent throughout.
+
+### The Message Queue
+
+When Haiku-san decides a message needs to be relayed to the OverClaude, it doesn't try to wake anything up or establish a real-time connection. It simply inserts the message into a queue (a SQLite table) and tells me it's been forwarded.
+
+The OverClaude checks this queue periodically - either through a manual check or via an automatic processor. When it picks up a message, it processes the request, writes a response back to the queue, and marks it complete. Haiku-san polls for completed responses and relays them back to me on Telegram.
+
+This asynchronous design is deliberate. The OverClaude might be in the middle of a complex task, or it might not be running at all. The queue ensures nothing gets lost, and responses arrive whenever they're ready. It's not instant messaging - it's more like leaving a note at the front desk and picking up the reply later.
+
+```
+You (Telegram) → Haiku-san → [classify intent]
+                                  ├── query    → Knowledge DB → reply
+                                  ├── remember → Knowledge DB → confirm
+                                  ├── chat     → LLM response → reply
+                                  └── relay    → Message Queue → OverClaude
+                                                                    ↓
+                                                              Response Queue
+                                                                    ↓
+                                                Haiku-san polls ← reply to you
+```
+
+### The Knowledge Database
+
+Haiku-san has direct read/write access to the same knowledge database that the OverClaude uses. This is the shared institutional memory - a SQLite database containing categorised memories about projects, decisions, lessons learned, infrastructure facts, and personal context.
+
+When you ask "what's the status of the netmoji project?" or "what did we decide about the voice pipeline?", Haiku-san doesn't need to bother the OverClaude. It runs the query against the database and formats the results itself. Similarly, "remember that the kitchen skylight remote uses 433MHz" goes straight into the database without any orchestrator involvement.
+
+This makes Haiku-san genuinely useful as a standalone tool, even when the OverClaude isn't running.
+
+## The Persona
+
+Haiku-san's character is defined in a dedicated persona file that controls all response text. The voice is consistent regardless of which intent path a message takes:
+
+- **Formal but warm.** "Good morning, Koz-san. The network appears healthy." Not stiff - just composed.
+- **Knows its place.** Never tries to be the OverClaude. If something is beyond its scope, it says so and offers to relay.
+- **Occasionally poetic.** A haiku appears now and then, but only when it fits. Never forced.
+- **Dry humour.** Understated, never slapstick. The kind of concierge who raises one eyebrow.
+
+The personality is powered by a 27-billion parameter language model running locally. It's the same model used across several of my AI projects - a capable open-source model fine-tuned for instruction following, with the persona layered on through the system prompt. No cloud APIs, no per-message costs, no data leaving the house.
+
+## Authentication
+
+Haiku-san is private by default. Every message handler checks the sender's Telegram user ID against an authorised list before processing anything. Unauthorised users get a polite refusal - no information leaks, no error messages that reveal the system's capabilities.
+
+This isn't a public bot. It's a personal assistant with a Telegram interface.
+
+## Technical Stack
+
+The implementation is deliberately minimal:
+
+- **`bot.py`** - Entry point, Telegram handlers, polling loop
+- **`persona.py`** - All response text lives here, keeping the voice consistent
+- **`ollama.py`** - Intent classification and conversational responses via the local LLM
+- **`overclaude.py`** - Subprocess wrappers for knowledge database operations
+- **`db.py`** - SQLite connection helper
+- **`schema.sql`** - Two tables: `message_queue` and `conversation_log`
+
+It runs as a systemd service on the inference server, starting automatically on boot and restarting on failure. Conversation history is pruned to the last 20 exchanges to keep the LLM's context window lean.
+
+The entire codebase is under 500 lines of Python. No frameworks, no ORMs, no over-engineering. It does one thing well: sit at the front desk and route messages to the right place.
+
+## Dispatch Integration
+
+The most powerful feature is automatic worker dispatch. When the OverClaude processes a relayed message and determines it needs hands-on work - modifying code, investigating an issue, running a build - it can spawn a worker session pre-loaded with relevant project context.
+
+The flow looks like this: I send a message on Telegram saying "the netmoji dashboard is showing stale data, can you investigate?" Haiku-san classifies this as a relay and queues it. The OverClaude picks it up, understands the context, and dispatches a worker session pointed at the netmoji codebase with the right background knowledge loaded. The worker investigates, fixes the issue, commits the change, and the OverClaude reports back through the queue. I get a Telegram message saying it's done.
+
+All from my phone, while I'm doing something else entirely.
+
+## What's Next
+
+Haiku-san is stable and handles daily use well, but the 60-second polling cycle means responses aren't instant. For time-sensitive alerts (like network infrastructure going down), other systems handle notifications directly. The queue architecture suits its purpose - conversational, not urgent.
+
+Future improvements might include richer formatting for knowledge database results and smarter context injection for relay messages. But honestly, the simplicity is the feature. A 500-line Python bot that gives me mobile access to the entire project management system? That's exactly the right amount of engineering.
+
+*Front desk is always open.*

@@ -1,25 +1,164 @@
 ---
 title: "The OverClaude"
-description: "The persistent meta-Claude that manages all my projects. Institutional memory, orchestrator, and the closest thing to a digital project manager I've ever had."
+description: "A persistent AI orchestrator that manages projects, remembers everything, dispatches workers, and learns from its own sessions. The closest thing to a digital project manager I've ever had."
 date: 2026-02-15
 status: "active"
-tech: ["Claude", "Python", "SQLite", "Bash"]
+tech: ["Claude Code", "Python", "SQLite", "Bash"]
 featured: false
 tags: ["AI", "orchestration", "meta"]
+hero_image: "/images/projects/overclaude-hero.jpeg"
 ---
 
-The OverClaude is the brains of the operation - a persistent Claude session that acts as project manager, institutional memory, and orchestrator for every project I run. Worker Claude sessions come and go; The OverClaude persists.
+import { Image } from 'astro:assets';
 
-## What It Does
+## The Problem With AI Assistants
 
-- **Knowledge Database**: SQLite-backed memory with semantic categories (decisions, lessons, patterns, context, milestones, personal). Memories decay over time but get boosted on access. Sacred memories are pinned forever.
-- **Worker Dispatch**: Spawns pre-loaded worker sessions with relevant context from the knowledge base. Workers build; The OverClaude plans.
-- **Session Capture**: Every worker session's transcript gets curated back into the knowledge base automatically. The system learns from its own work.
+AI assistants are goldfish. Every conversation starts from zero. You explain your project, your preferences, your infrastructure, your decisions - and then the session ends and it all evaporates. Next time, you start over. Explain everything again. Hope you remember what you told it last time.
+
+For a single conversation, that's fine. For managing a portfolio of projects across weeks and months, it's a dealbreaker. I needed an AI that *remembers* - not just what I asked it to do, but why, what we tried, what worked, what didn't, and what I care about.
+
+The OverClaude is the answer to that problem. It's a persistent orchestration layer built on top of [Claude Code](https://docs.anthropic.com/en/docs/claude-code) that acts as project manager, institutional memory, and dispatcher for every project I run. Worker sessions come and go. The OverClaude persists.
+
+## Why I Built It
+
+I'm not a software developer. I'm an infrastructure guy who manages systems and networks for a living. But I have a lot of projects - a [smart home](/projects/haus) with over 700 devices, a [network monitoring dashboard](/projects/netmoji), a [D&D campaign engine](/projects/claude-dnd), astrophotography tools, and more. Each one involves code, configuration, and decisions that build on each other over time.
+
+Without The OverClaude, every coding session started with the same overhead: "Here's the project, here's what we've done so far, here's how the infrastructure works, here's the approach we agreed on last time." It was like having a brilliant contractor who shows up every morning with complete amnesia.
+
+The OverClaude fixes that by giving the AI two things it normally lacks: a memory that persists between sessions, and the ability to send other AI sessions out to do work with the right context already loaded.
 
 ## The Two-Hemisphere Brain
 
-Personality lives in CLAUDE.md files (the "right brain" - tone, preferences, ground rules). Knowledge lives in the SQLite database (the "left brain" - facts, decisions, patterns). Together they give each session context without needing to replay entire conversation histories.
+The system is built around a simple idea: separate *personality* from *knowledge*.
 
-## Why It Exists
+**The right hemisphere** is a set of instruction files that define how The OverClaude behaves. Communication style, ground rules, project preferences, infrastructure details - all written in plain text. Every session loads these automatically, so the AI always knows the house rules without being told.
 
-I'm not a developer. I'm an infrastructure guy who happens to have an army of AI assistants now. The OverClaude makes sure they all know what they're doing, what's been tried before, and what I care about. It's the difference between a fresh intern every morning and a team that actually remembers yesterday.
+**The left hemisphere** is a SQLite database - a lightweight, file-based database that stores everything The OverClaude has learned. Decisions made, lessons learned, reusable patterns, infrastructure facts, project milestones, even personal context about my preferences and interests. Each memory is categorised, tagged, and scored for relevance.
+
+Together, the two hemispheres mean that any new session - whether it's The OverClaude itself or a worker it dispatches - starts with the right personality *and* the right knowledge. No briefing required.
+
+## The Knowledge Database
+
+The database is the heart of the system. Every memory has a category, an importance level, tags for search, and a relevance score that changes over time.
+
+<table class="w-full text-sm">
+  <thead>
+    <tr>
+      <th class="text-left pr-8 pb-2">Category</th>
+      <th class="text-left pb-2">What It Stores</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="pr-8 py-1">Decision</td>
+      <td class="py-1">Choices about how to do things - tech stack, architecture, naming</td>
+    </tr>
+    <tr>
+      <td class="pr-8 py-1">Lesson</td>
+      <td class="py-1">Things that went wrong or unexpected discoveries</td>
+    </tr>
+    <tr>
+      <td class="pr-8 py-1">Pattern</td>
+      <td class="py-1">Reusable technical approaches that worked</td>
+    </tr>
+    <tr>
+      <td class="pr-8 py-1">Context</td>
+      <td class="py-1">Infrastructure facts, workflow preferences, environment details</td>
+    </tr>
+    <tr>
+      <td class="pr-8 py-1">Milestone</td>
+      <td class="py-1">Significant completions worth remembering</td>
+    </tr>
+    <tr>
+      <td class="pr-8 py-1">Personal</td>
+      <td class="py-1">Things about me, my family, my opinions, the people I work with</td>
+    </tr>
+  </tbody>
+</table>
+
+<br />
+
+The database currently holds hundreds of memories across a dozen projects. But raw accumulation isn't useful - what matters is keeping the knowledge *relevant*.
+
+## Memory Decay
+
+Not every memory stays important forever. The OverClaude implements a decay system inspired by how human memory works: memories that aren't accessed gradually lose relevance, while memories that keep getting pulled into sessions get stronger.
+
+Every memory has a relevance score that starts at 1.0. Each week, unused memories decay slightly. Each time a memory gets loaded into a session context, its score gets a boost. Memories that decay below a threshold get archived - hidden from queries but never deleted. If something turns out to be important again later, it can be recovered.
+
+Some memories are exempt from decay entirely. I can pin any memory as "sacred" - these are facts, preferences, or decisions that should never fade. Things like project credentials, personal preferences, or hard-won lessons that took real pain to learn.
+
+## The Curator
+
+Memories don't write themselves. The OverClaude has an automated curation pipeline that processes session transcripts and extracts useful knowledge.
+
+When a Claude session ends - any session, not just The OverClaude - a hook fires automatically. It captures the full transcript of what happened, stores it as a raw log, and then passes it to the curator. The curator is a locally-hosted large language model (a 27-billion parameter open-source model running on a dedicated GPU server) that reads the transcript and extracts structured memories from it.
+
+The curator knows what categories to use, what's worth remembering, and what's noise. It runs in two modes: a quick pass after every session for immediate capture, and a scheduled sweep every 30 minutes as a safety net to catch anything that slipped through.
+
+There's also a consolidation pass that reviews the entire database periodically, merging duplicates, adjusting importance levels, and cleaning up memories that aren't pulling their weight. Think of it as a librarian who periodically walks the shelves, tidying up and weeding out the collection.
+
+## Worker Dispatch
+
+The OverClaude's most powerful feature is its ability to send other AI sessions out to do work - pre-loaded with everything they need to know.
+
+Here's the typical flow: I tell The OverClaude what I need done. It looks up the relevant project in its database, gathers the project-specific memories, pulls in cross-project lessons that might be relevant, and assembles a context package. Then it spawns a worker session with all of that knowledge injected from the start.
+
+The worker doesn't need to be briefed. It already knows the project structure, the tech stack, the decisions we've made, the mistakes to avoid, and the task at hand. It does the work, commits the code, and when the session ends, the transcript gets fed back through the curator pipeline. The OverClaude learns from the worker's experience without having been there.
+
+This creates a genuine feedback loop: The OverClaude dispatches workers with knowledge, workers generate new knowledge through their work, and that knowledge feeds back into the database for future sessions.
+
+Different tasks get different models. Quick implementation work gets dispatched to faster, cheaper models. Architecture reviews and complex decisions stay on the most capable model available. The OverClaude decides which to use based on the nature of the task.
+
+## The Mobile Layer
+
+The OverClaude runs as a terminal session on a server. That's great when I'm at my desk, but I'm often not - I'm at work, or out with the horses, or driving. That's where [Haiku-san](/projects/haiku-san) comes in: a Telegram bot that acts as a receptionist, sitting between my phone and The OverClaude.
+
+Quick questions about projects get answered directly from the knowledge database. Things I want to remember get stored immediately. Actual work requests get queued for The OverClaude to pick up and dispatch. I can fire off a message from my phone saying "the dashboard is showing stale data, can you investigate?" and come back later to find the issue diagnosed, fixed, committed, and a response waiting for me on Telegram.
+
+## What It Looks Like In Practice
+
+A typical day might go like this: I notice something odd with the smart home automations while making coffee. I send a message on Telegram. Haiku-san classifies it as a relay and queues it. The OverClaude picks it up, understands the context (because it has the full history of the smart home project in its database), and dispatches a worker session pointed at the right codebase. The worker investigates, finds the issue, fixes it, commits the change. The session transcript gets curated back into the database. Haiku-san sends me a summary on Telegram.
+
+I didn't open a terminal. I didn't explain the project. I didn't tell anyone where the config files live or what we changed last week. The system knew.
+
+## The Architecture
+
+The codebase is deliberately small - around a dozen Python files and a SQL schema:
+
+```
+CLAUDE.md              - Personality, ground rules, infrastructure docs
+schema.sql             - Database schema (projects, sessions, memories)
+memory.db              - The knowledge database itself
+    |
+curator.py             - Extracts memories from session transcripts
+consolidate.py         - Merges duplicates, adjusts importance, cleans up
+session_end.py         - Hook that fires after every session
+    |
+orchestrate.py         - Builds context packages for worker dispatch
+query.py               - Searches and retrieves memories
+remember.py            - Pins sacred memories that never decay
+projects.py            - Maps project names to filesystem paths
+```
+
+<br />
+
+No frameworks, no web servers, no microservices. Just Python scripts that read and write a SQLite database, with a locally-hosted language model doing the heavy lifting for curation. The whole thing runs on standard Linux tools - cron jobs, shell scripts, and systemd services.
+
+## Lessons Learned
+
+**Memory without curation is just hoarding.** The first version of the database grew rapidly and became noisy. Decay, consolidation, and importance scoring turned a pile of facts into a useful knowledge base. The curator needed several iterations to get the balance right - too aggressive and useful memories disappeared, too lenient and everything was "high importance."
+
+**Personality and knowledge are different problems.** Instruction files handle tone, style, and rules reliably. But they're terrible for facts that change over time. The database handles dynamic knowledge well, but it can't define personality. Splitting them into two hemispheres solved both problems cleanly.
+
+**The orchestrator should never do the work.** Early on, I'd sometimes ask The OverClaude to make code changes directly. That always went badly - it would lose track of its orchestration role and start acting like a developer. Now the rule is absolute: The OverClaude plans and dispatches. Workers build. The separation is what makes the system reliable.
+
+**Small Python scripts beat big frameworks.** The entire system is under 2,000 lines of Python. No dependencies beyond the standard library and an HTTP call to the local language model. When something breaks, I can read the code and understand what happened. That matters when you're not a developer.
+
+## Why It Matters
+
+The OverClaude isn't just a productivity tool. It's a proof of concept for something I think is genuinely important: AI that learns from its own work and gets better over time, without retraining or fine-tuning. Every session makes the knowledge base richer. Every mistake gets recorded so it's not repeated. Every decision gets documented so future sessions have context.
+
+It's the difference between hiring a new contractor every morning and having a team that actually remembers yesterday. And for someone who isn't a developer but has a lot of ambitious projects, that difference is everything.
+
+*The front desk is always open. The brain never sleeps.*

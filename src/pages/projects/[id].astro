@@ -13,6 +13,13 @@ const d = post.data;
 ---
 
 <BaseLayout title={d.title} description={d.description}>
+  {d.hero_image && (
+    <div class="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
+      <div class="rounded-xl overflow-hidden aspect-[3/1]">
+        <img src={d.hero_image} alt={d.title} class="w-full h-full object-cover" />
+      </div>
+    </div>
+  )}
   <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <h1 class="text-4xl md:text-5xl font-['Outfit'] font-bold text-white mb-4">{d.title}</h1>
     <div class="flex flex-wrap gap-3 mb-8">

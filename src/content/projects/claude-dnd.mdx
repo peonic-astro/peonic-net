@@ -1,0 +1,182 @@
+---
+title: "Claude as Dungeon Master"
+description: "A ready-to-fork template for running full D&D 5e campaigns with Claude Code as your DM. Tactical combat, persistent worlds, secret plot notes, and a DM who never cancels on game night."
+date: 2026-01-20
+status: "active"
+tech: ["Claude Code", "D&D 5e SRD", "Git", "Markdown"]
+featured: false
+tags: ["AI", "D&D", "tabletop", "open-source"]
+hero_image: "/images/projects/claude-dnd-hero.jpeg"
+---
+
+import { Image } from 'astro:assets';
+
+## The Pitch
+
+What if your Dungeon Master never cancelled, never forgot a plot thread, and could run a session at 2am on a Tuesday because you couldn't sleep?
+
+That's Claude as Dungeon Master - a complete, open-source template for running full D&D 5e campaigns using [Claude Code](https://docs.anthropic.com/en/docs/claude-code) as your DM. Not a chatbot that vaguely describes rooms. An actual DM that tracks initiative, draws ASCII battle maps, maintains secret plot notes you can't see, and writes prose that lands somewhere between Joe Abercrombie and a really well-prepped human DM.
+
+I built this because I love D&D but scheduling five adults in their 40s and 50s for a regular session is basically impossible. Turns out Claude is genuinely excellent at running tabletop RPGs - not "good for an AI," just *good*.
+
+## How It Works
+
+The entire system runs in your terminal through Claude Code. You fork the repository, create a campaign branch, and start playing. That's it. No web app, no special setup, no dice - Claude handles all the rolling.
+
+## Everything is Markdown
+
+Campaign state lives in plain text files that Claude reads and updates as you play:
+
+| File | What It Tracks |
+|------|---------------|
+| `character.md` | Your character sheet - stats, abilities, backstory |
+| `inventory.md` | Equipment, currency, consumables |
+| `world_state.md` | The current state of everything (the source of truth) |
+| `adventure_log.md` | Session-by-session recaps |
+| `npcs.md` | NPCs you've met and what you know about them |
+| `locations.md` | Places you've been |
+| `dm_only/` | The DM's secret notes - plot threads, NPC agendas, hidden information |
+
+That last one is the clever bit. Claude uses a separate sub-agent process to read and write its secret plot notes, so they never appear in your conversation. It genuinely has secrets you don't know about. NPCs have hidden agendas. Plot twists are planned in advance, not improvised on the fly. If you go reading `dm_only/story_prep.md` you're only spoiling it for yourself.
+
+## Git is Your Save System
+
+Every commit is a save point. Claude saves progress at natural breakpoints - end of a session, after a big fight, at a long rest - but you can commit manually whenever you want. Want to undo a catastrophic decision? Roll back to any previous commit. Git gives you unlimited save slots with perfect recall.
+
+Multiple campaigns live on separate branches. Switch between a gritty dungeon crawl and a lighthearted tavern romp by checking out a different branch. Each campaign is completely independent.
+
+```
+main branch          → Template (DM instructions, SRD rules, README)
+├── wychwood         → Dark forest mystery campaign
+├── hamm-campaign    → City intrigue and political manoeuvring
+└── tamwin-campaign  → Dungeon crawl, currently active
+```
+
+## What Makes It Good
+
+## Tactical Combat
+
+Claude draws ASCII maps, tracks positioning, and runs proper 5e combat with initiative order, opportunity attacks, cover bonuses, the works. You tell it where to move and what to do each turn. It rolls dice transparently and applies the rules correctly.
+
+```
+    1   2   3   4   5   6   7   8
+  +---+---+---+---+---+---+---+---+
+A | . | . | . | # | # | . | . | . |
+  +---+---+---+---+---+---+---+---+
+B | . | T | . | # | . | . | G | . |
+  +---+---+---+---+---+---+---+---+
+C | . | . | . | . | . | . | . | . |
+  +---+---+---+---+---+---+---+---+
+D | . | . | G | . | . | . | . | . |
+  +---+---+---+---+---+---+---+---+
+
+T = Tamwin (you)  G = Goblins  # = Stone pillars (full cover)
+```
+
+## NPCs With Teeth
+
+The DM instructions explicitly require that NPCs be autonomous. Not everyone agrees with or helps the player character. NPCs pursue their own goals, can disagree, refuse, deceive, or work against you. Roughly 10% of significant NPCs have hidden agendas tracked in the secret notes. The world doesn't revolve around the player - it has its own logic and momentum.
+
+## Player Agency, Not Railroading
+
+The system is designed to prep *situations*, not *plots*. Claude knows what's happening in the world and lets your choices determine where the story goes. It will never suggest what you should do, list your options, or prompt you for action. It describes the world and waits. You decide.
+
+Three communication modes keep the conversation clear:
+
+<table class="w-full text-sm">
+  <thead>
+    <tr>
+      <th class="text-left pr-6 pb-2">Format</th>
+      <th class="text-left pr-6 pb-2">Meaning</th>
+      <th class="text-left pb-2">Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="pr-6 py-1"><code>"Quoted text"</code></td>
+      <td class="pr-6 py-1">Your character speaking aloud</td>
+      <td class="py-1"><em>"I don't trust you, innkeeper."</em></td>
+    </tr>
+    <tr>
+      <td class="pr-6 py-1">Plain text</td>
+      <td class="pr-6 py-1">Actions, thoughts, directions</td>
+      <td class="py-1"><em>I search the room for hidden doors.</em></td>
+    </tr>
+    <tr>
+      <td class="pr-6 py-1"><code>[Square brackets]</code></td>
+      <td class="pr-6 py-1">Out-of-character</td>
+      <td class="py-1"><em>[Can we retcon that last bit?]</em></td>
+    </tr>
+  </tbody>
+</table>
+
+## The World Doesn't Scale to You
+
+Some fights can't be won at level 1. Claude drops hints when something is out of your league - NPCs warning you off, environmental clues like destroyed armour and scattered bones, opportunities to retreat. Running away is always a valid tactical choice.
+
+This lesson was learned the hard way. An early playtest session ended in a total party kill when level 1 characters stumbled into CR 1 creatures that could deal 10-22 damage per hit against a wizard with 8 HP. The encounter balance rules were completely rewritten after that. Now difficulty scales gradually: CR 1/4 creatures at level 1, building up as you gain experience. Deadly encounters get clear warning signs and alternative approaches.
+
+## Continuity Across Sessions
+
+Before every response where it matters, Claude checks the world state file and its session notes. It tracks what NPCs know based on timeline and travel - news doesn't travel faster than people walking. An NPC in a remote village won't know about events in the capital unless someone could realistically have told them.
+
+Session notes are written to disk every 5-10 exchanges as working memory. At the end of each session, a consistency check verifies that HP, spell slots, currency, and inventory all match across files. Nothing drifts.
+
+## The DM's Personality
+
+The `CLAUDE.md` file controls everything about how Claude runs the game. The default personality is inspired by a veteran tabletop game designer - someone who's been running campaigns for decades, designs from emotional resonance rather than just mechanics, and knows when to push hard versus hold back.
+
+The tone leans toward dark, gritty fantasy in the style of David Gemmell and Joe Abercrombie. Morally grey NPCs. Real consequences. No easy wins. But that's just a starting point - the personality, tone, house rules, and difficulty curves are all configurable. Want a lighter Pratchett-esque romp? Edit the style section. Want hardcore survival mechanics? Add house rules. It's your game.
+
+## Getting Started
+
+The repo is public and ready to fork. You need [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed and a GitHub account - that's it.
+
+export const CopyLine = ({cmd, comment}) => (
+  <div class="group/line flex items-center gap-2 my-1">
+    <code class="flex-1 bg-void-light rounded px-3 py-1.5 text-sm font-mono text-slate-300 block">{comment ? <span class="text-slate-500">{`# ${comment}`}</span> : <><span class="text-emerald-400">$</span> {cmd}</>}</code>
+    {cmd && <button
+      class="text-xs bg-white/10 hover:bg-white/20 text-slate-400 px-2 py-1 rounded transition-colors shrink-0"
+      onclick={`navigator.clipboard.writeText('${cmd}');this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500)`}
+    >Copy</button>}
+  </div>
+);
+
+<div class="my-6 space-y-0.5">
+  <CopyLine comment="Fork the repo on GitHub first, then:" />
+  <CopyLine cmd="git clone https://github.com/peonic-astro/claude-dnd.git" />
+  <CopyLine cmd="cd claude-dnd" />
+  <CopyLine comment="Create a campaign branch (main stays as the template)" />
+  <CopyLine cmd="git checkout -b my-campaign" />
+  <CopyLine cmd="git push -u origin my-campaign" />
+  <CopyLine comment="Start playing" />
+  <CopyLine cmd="claude" />
+</div>
+
+Claude reads the `CLAUDE.md` instructions and knows it's your DM. Your first message can be as simple as:
+
+> I want to play a halfling rogue named Pip who grew up picking pockets in a harbour city.
+
+Claude takes it from there - builds your character sheet, creates the opening scene, and waits for you to act. The full D&D 5e SRD is included in the repo so Claude can look up monster stat blocks, spell descriptions, and class features on demand.
+
+## From the Current Campaign
+
+<div class="my-8 rounded-xl overflow-hidden border border-white/10">
+  <img src="/images/projects/ser-eric.jpeg" alt="Ser Eric Snow - a bastard-born hedge knight riding south at dusk" class="w-full" />
+</div>
+
+The latest campaign started because I was watching HBO's adaptation of *A Knight of the Seven Kingdoms* and thought "how cool would it be to roleplay a hedge knight?" Five minutes later I had a campaign branch, a character concept, and Claude was building the opening scene.
+
+Ser Eric Snow is a bastard-born hedge knight riding south with nothing but a dead master's horse, a longsword, and complicated feelings. His first session involved talking a group of farmers into helping him clear out a bandit camp, scouting ahead through a rain-soaked ditch, quietly taking down a sentry, discovering the "bandits" were actually hired to find *him*, and ending the night sleeping in a barn with a mysterious letter pressed against his chest.
+
+Two sessions in, Eric has a bounty on his head from a mysterious nobleman he's never met, a dead knight's hidden letter he can't yet decipher, and an archer companion who was suspiciously ready to ride before he was even asked. The DM has secrets I don't know about, planned in files I can't see. I genuinely don't know who's pulling the strings or why they want Eric found, and that uncertainty is what makes it work.
+
+## Why This Matters
+
+There's something genuinely magical about playing D&D with an AI that has actual secrets from you. When an NPC acts suspiciously and you don't know whether to trust them, that uncertainty is *real* - Claude has their true motivations written down in a file you can't see. When a plot twist lands, it was planned sessions ago, not improvised in the moment.
+
+It's not a replacement for playing with friends around a table. Nothing is. But it's a remarkably good way to scratch the itch when scheduling doesn't cooperate, and it's produced some of the most memorable gaming moments I've had in years.
+
+The system remembers its mistakes, too. That early TPK led to a complete rewrite of the encounter balance rules. Every campaign makes the template better for the next one.
+
+*"Roll for initiative."*

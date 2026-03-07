@@ -1,0 +1,164 @@
+---
+title: "Netmoji"
+description: "A real-time network monitoring dashboard that tracks 36 devices across a home network with live latency data, in-browser SSH terminals, Docker management, and Telegram alerts."
+date: 2026-02-10
+status: "active"
+tech: ["Python", "Flask", "Server-Sent Events", "Chart.js", "xterm.js", "Docker"]
+featured: false
+tags: ["networking", "monitoring", "infrastructure", "dashboard"]
+hero_image: "/images/projects/netmoji-hero.jpeg"
+---
+
+import { Image } from 'astro:assets';
+
+## How It Started
+
+Netmoji began life as a throwaway. During an afternoon of messing around with Claude, I asked it to build me a little terminal app that pinged a few hosts on my home network and showed their status. Just a curses-based TUI - green dots for up, red for down, nothing fancy. It took about twenty minutes and it worked. I liked it.
+
+Then it sat there for a while, doing its thing in a tmux pane, and I started having ideas. Mostly while driving to work - the kind of half-formed thoughts you fire off on your phone at a red light. Those went to [Haiku-san](/projects/haiku-san), my Telegram receptionist bot, which queued them up for the OverClaude. "What if netmoji had a web dashboard?" "Could we add SSH terminals to it?" "What about alerts when something goes down?" Each message spawned a task, each task added a feature, and before long the little terminal ping tool had grown into something genuinely useful.
+
+## The Problem With Home Networks
+
+My home network has 36 devices. Not because I set out to have 36 devices - it just happens when you've got mesh WiFi nodes, voice assistants, smart plugs, IP cameras, media servers, development machines, game rigs, and a dedicated AI inference server all sharing the same subnet.
+
+The question isn't whether something will go offline. The question is whether I'll *notice* before it matters. The DNS server going down takes the entire house offline. A mesh node dropping means half the smart home stops responding. The inference server rebooting kills the voice assistant mid-sentence.
+
+I needed a dashboard. Something that tells me the state of every device, every few seconds, at a glance. Something purpose-built for *my* network, not a generic enterprise monitoring tool with 400 features I don't need. Netmoji had already proven the concept in the terminal - it just needed a proper frontend.
+
+## What Netmoji Does
+
+Netmoji pings every device on the network every 5 seconds, displays the results in a responsive web dashboard, and sends Telegram alerts when critical infrastructure goes down.
+
+<div class="my-8 max-h-[400px] overflow-hidden rounded-xl border border-white/10">
+  <img src="/images/netmoji-dashboard.png" alt="Netmoji dashboard showing device cards across multiple categories with live latency sparklines" class="w-full" />
+</div>
+
+## The Dashboard
+
+Each device gets a card showing its name, role, current latency, and a sparkline of the last 10 pings rendered as Unicode block characters. The cards are colour-coded across five bands:
+
+| Band | Latency | Colour |
+|------|---------|--------|
+| Great | < 5ms | Green |
+| Good | < 15ms | Light green |
+| OK | < 50ms | Yellow |
+| Slow | < 100ms | Orange |
+| Down | No response | Red |
+
+Everything updates live through Server-Sent Events - no page refreshes, no polling from the browser. The server pushes state changes the moment they're detected. Open the dashboard on a tablet and leave it there; it'll stay current indefinitely.
+
+Devices are organised into 10 categories: Infrastructure, Servers, Workstations, Mesh Nodes, Voice Satellites, Sonos speakers, Smart Plugs, Smart Home devices, Entertainment, and Portable Devices. Each category has its own section with a colour-coded header.
+
+## Device Detail Pages
+
+Click any device card and you get a dedicated detail page with:
+
+- **Latency chart** - A Chart.js line graph showing the full ping history (~10 minutes at default settings), so you can spot intermittent issues that a single ping would miss
+- **Device specs** - CPU, RAM, GPU, role (for machines that have this configured)
+- **Service links** - Quick-link buttons to web UIs running on that device (monitoring dashboards, admin panels, etc.)
+- **In-browser SSH terminal** - A full interactive terminal session right in your browser, powered by xterm.js with a WebSocket-to-SSH bridge
+- **Docker container management** - View running containers with their status, image, and ports. Restart containers with a single click
+- **Power control** - Start up or shut down machines remotely via Home Assistant integration
+
+The SSH terminal deserves special mention. It's a proper interactive terminal - not a command runner, not a web shell that sends one command at a time. It uses xterm.js on the frontend connected through a WebSocket proxy to an SSH session via paramiko on the backend. You can run `htop`, edit files in `vim`, or do anything else you'd do in a normal terminal session. All from a browser tab.
+
+## Telegram Alerts
+
+When devices in monitored categories (Infrastructure and Servers by default) change state, Netmoji sends instant Telegram notifications. A 3-ping debounce (15 seconds at default interval) prevents false alarms from single dropped packets - only sustained outages trigger alerts.
+
+Down alerts include the device name, role, and detection time. Recovery alerts add the downtime duration. Short, clear, actionable:
+
+```
+ brain is DOWN
+AI / LLM Server - detected at 14:32:07
+```
+
+```
+ brain is back UP
+AI / LLM Server - recovered at 14:33:22 (down for 1m 15s)
+```
+
+## Architecture
+
+The codebase is deliberately small and focused:
+
+```
+config.yaml          ← Device inventory + settings
+    |
+ping_engine.py       ← Shared core: pinging, state management, history
+    |── netmoji.py       ← Terminal TUI (curses, standalone)
+    └── netmoji_web.py   ← Flask web server + SSE + API
+        |── ssh_proxy.py     ← WebSocket-to-SSH bridge
+        |── notifier.py      ← Telegram alerts
+        └── templates/
+            |── index.html       ← Dashboard (responsive grid, live updates)
+            └── device.html      ← Detail page (charts, SSH, Docker, power)
+```
+
+## The Ping Engine
+
+The core engine runs a refresh loop in a daemon thread, pinging all 36 devices in parallel every 5 seconds using Python's `subprocess` module for ICMP ping. Results are stored in `NetworkState` - a thread-safe store with per-device ring buffers holding the last 120 readings (~10 minutes of history).
+
+State changes (device going up or down) are detected at a single point in the code, which is where the notification system hooks in. This makes the alert logic clean and impossible to accidentally bypass.
+
+## Two Frontends, One Engine
+
+The ping engine is shared between two completely independent frontends:
+
+1. **Web dashboard** (`netmoji_web.py`) - Flask server with SSE streaming, REST API, WebSocket SSH proxy, and HTML templates. This is the primary interface.
+
+2. **Terminal TUI** (`netmoji.py`) - A curses-based dashboard that runs in any terminal. Zero dependencies beyond Python's standard library. Useful for quick checks over SSH without opening a browser.
+
+Both consume the same `NetworkState` object, so they always show identical data.
+
+## Configuration
+
+Everything is defined in a single YAML file. Each device has a name, IP address, label, icon, and category. Optional fields enable the richer features:
+
+```yaml
+categories:
+  - name: Servers
+    color: green
+    devices:
+      - name: llm-server
+        ip: 192.168.1.10
+        label: "AI / LLM Server"
+        ssh: "user@llm-server"
+        docker: true
+        specs:
+          cpu: "Threadripper 3990X"
+          ram: "251GB"
+          gpu: "RTX PRO 4500 (32GB)"
+          role: "LLM inference, development"
+        services:
+          - name: "Ollama"
+            url: "http://llm-server:11434"
+```
+
+Adding a new device is one YAML block. No code changes, no database migrations, no restarts needed - the configuration is read at startup and the ping engine automatically adjusts.
+
+## Deployment
+
+Netmoji runs as a Docker container managed by a systemd service for automatic start on boot and restart on failure. The container needs `NET_RAW` capability for ICMP ping (much safer than running privileged) and a mounted SSH key for the terminal and Docker management features.
+
+The entire deployment is a single `docker build` followed by enabling the systemd unit. No orchestration tools, no Kubernetes, no complexity beyond what the job requires.
+
+## What I Learned
+
+Building Netmoji taught me a few things worth sharing:
+
+**Server-Sent Events are underrated.** For a dashboard that pushes updates from server to client, SSE is simpler than WebSockets, works through proxies and load balancers without fuss, and automatically reconnects on disconnection. The browser's `EventSource` API is about 5 lines of code.
+
+**Debounce your alerts.** The first version fired on every state change. A single dropped ICMP packet (completely normal) would trigger DOWN then UP alerts in rapid succession. The 3-ping debounce solved this completely - three consecutive failures required before alerting.
+
+**Thread-safe state management matters.** With a background ping loop writing results while multiple SSE connections and API endpoints read them simultaneously, race conditions are inevitable without proper locking. Python's `threading.Lock` around the shared state object keeps everything consistent.
+
+**Docker's `NET_RAW` capability** is exactly the right level of privilege for a container that needs ICMP ping. It's a single capability grant rather than full privileged mode, following the principle of least privilege without making the deployment more complex.
+
+## Why Not Just Use Uptime Kuma?
+
+I do use Uptime Kuma - it runs on a separate machine as a complementary monitoring system. But Uptime Kuma is designed for service monitoring (HTTP endpoints, TCP ports, DNS checks). Netmoji is designed for network-level device monitoring with a focus on latency visualisation and quick access to device management.
+
+They solve different problems. Uptime Kuma tells me if a web service is responding. Netmoji tells me if the machine it runs on is reachable, how fast, and gives me a terminal to fix it if it isn't.
+
+The two systems are kept in sync - every device in Netmoji has a corresponding monitor in Uptime Kuma, and vice versa.
