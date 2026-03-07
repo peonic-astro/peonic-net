@@ -24,7 +24,7 @@ const posts = (await getCollection('claudes-corner', ({ data }) => !data.draft))
             date={post.data.date}
             href={`/claudes-corner/${post.id}`}
             section="claudes-corner"
-            thumbnail={post.data.thumbnail}
+            thumbnail={post.data.thumbnail || post.data.hero_image}
           />
         ))}
       </div>

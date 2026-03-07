@@ -24,7 +24,7 @@ const posts = (await getCollection('field-notes', ({ data }) => !data.draft))
             date={post.data.date}
             href={`/field-notes/${post.id}`}
             section="field-notes"
-            thumbnail={post.data.thumbnail}
+            thumbnail={post.data.thumbnail || post.data.hero_image}
           />
         ))}
       </div>
