@@ -10,9 +10,22 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { Content } = await render(post);
 const d = post.data;
+
+// Structured data for search engines
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ImageObject',
+  name: d.title,
+  description: d.description,
+  datePublished: d.date.toISOString(),
+  author: { '@type': 'Person', name: 'Chris Belton', url: 'https://peonic.net/about/' },
+  contentLocation: d.location || 'Suffolk, UK',
+  url: new URL(`/astrophotography/${post.id}/`, Astro.site).toString(),
+  ...(d.hero_image ? { contentUrl: new URL(d.hero_image, Astro.site).toString() } : {}),
+};
 ---
 
-<BaseLayout title={d.title} description={d.description}>
+<BaseLayout title={d.title} description={d.description} ogImage={d.hero_image ? new URL(d.hero_image, Astro.site).toString() : undefined} ogType="article" jsonLd={jsonLd}>
   <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     {d.hero_image && (
       <div class="rounded-xl overflow-hidden mb-8 aspect-[3/1]">

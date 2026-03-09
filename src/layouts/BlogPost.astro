@@ -6,14 +6,16 @@ interface Props {
   date: Date;
   hero_image?: string;
   tags?: string[];
+  jsonLd?: Record<string, unknown>;
 }
 
 import BaseLayout from './BaseLayout.astro';
 
-const { title, description, date, hero_image, tags = [] } = Astro.props;
+const { title, description, date, hero_image, tags = [], jsonLd } = Astro.props;
+const ogImage = hero_image ? new URL(hero_image, Astro.site).toString() : undefined;
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} ogImage={ogImage} ogType="article" jsonLd={jsonLd}>
   <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     {hero_image && (
       <div class="rounded-xl overflow-hidden mb-8 aspect-[3/1]">

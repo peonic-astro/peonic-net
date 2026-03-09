@@ -9,8 +9,20 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content } = await render(post);
+const d = post.data;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: d.title,
+  description: d.description,
+  datePublished: d.date.toISOString(),
+  author: { '@type': 'Person', name: 'Chris Belton', url: 'https://peonic.net/about/' },
+  url: new URL(`/workshop/${post.id}/`, Astro.site).toString(),
+  ...(d.hero_image ? { image: new URL(d.hero_image, Astro.site).toString() } : {}),
+};
 ---
 
-<BlogPost title={post.data.title} description={post.data.description} date={post.data.date} tags={post.data.tags}>
+<BlogPost title={d.title} description={d.description} date={d.date} hero_image={d.hero_image} tags={d.tags} jsonLd={jsonLd}>
   <Content />
 </BlogPost>

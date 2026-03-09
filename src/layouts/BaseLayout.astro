@@ -3,10 +3,20 @@ interface Props {
   title: string;
   description?: string;
   ogImage?: string;
+  ogType?: string;
+  jsonLd?: Record<string, unknown>;
 }
 
-const { title, description = 'Astrophotography, projects, and tinkering by Koz.', ogImage } = Astro.props;
+const {
+  title,
+  description = 'Astrophotography, projects, and tinkering by Koz.',
+  ogImage,
+  ogType = 'website',
+  jsonLd,
+} = Astro.props;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+// Fall back to a default social image if none provided
+const socialImage = ogImage || new URL('/images/hero/bubble.jpg', Astro.site).toString();
 ---
 
 <html lang="en">
@@ -23,9 +33,21 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta name="description" content={description} />
     <meta property="og:title" content={`${title} | Peonic`} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:url" content={canonicalURL} />
-    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta property="og:image" content={socialImage} />
+    <meta property="og:site_name" content="Peonic" />
+
+    <!-- Twitter/X card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={`${title} | Peonic`} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImage} />
+
+    <!-- Structured data -->
+    {jsonLd && (
+      <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    )}
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
