@@ -1,45 +1,196 @@
 @import "tailwindcss";
 
-/* Custom theme tokens */
+/* ==========================================================================
+   Observatory + Brutalist design system (mockup #7, locked 2026-05-19).
+   Core palette is fire/chalk/steel on a near-black void. One accent (fire);
+   everything else is chalk text and steel borders. No old void/amber tokens.
+   ========================================================================== */
 @theme {
-  --color-void: #0a0a1a;
-  --color-void-light: #12122a;
-  --color-void-lighter: #1a1a3a;
-  --color-amber: #f5a623;
-  --color-amber-light: #ffc857;
-  --color-amber-dark: #c47f17;
-  --color-slate-dim: #94a3b8;
-  --color-slate-bright: #cbd5e1;
+  /* Backgrounds: near-black, with two slightly lifted shades for panels. */
+  --color-void: #000000;
+  --color-void-light: #080808;
+  --color-void-lighter: #121212;
+
+  /* The single accent. Fire-dim is for pressed/secondary states. */
+  --color-fire: #ff4d00;
+  --color-fire-dim: #cc3d00;
+
+  /* Text: chalk is body, chalk-dim is secondary/muted. */
+  --color-chalk: #f0ede8;
+  --color-chalk-dim: #a8a4a0;
+
+  /* Borders and hairlines. Steel-light is for hover/contrast. */
+  --color-steel: #333333;
+  --color-steel-light: #555555;
+
+  /* Type: Archivo body, Bebas Neue display, Space Mono labels.
+     Defining --font-* here generates the matching font-* utilities. */
+  --font-sans: 'Archivo', system-ui, sans-serif;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-mono: 'Space Mono', monospace;
 }
 
-/* Base styles */
+/* Base styles. The site is dark-first brutalist - there is no light theme. */
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
   background-color: var(--color-void);
-  color: var(--color-slate-bright);
+  color: var(--color-chalk);
 }
 
-/* Light theme override */
-html.light body {
-  background-color: #f8fafc;
-  color: #1e293b;
+/* ---- Ported mockup primitives -------------------------------------------- */
+
+/* Hero image breathes with a slow, looping zoom. */
+.hero-img {
+  animation: slowZoom 20s ease-in-out infinite alternate;
+}
+@keyframes slowZoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.08); }
 }
 
-/* Prose CSS vars */
+/* Short fire-to-transparent rule used under hero/section headings. */
+.editorial-line {
+  background: linear-gradient(90deg, #ff4d00 0%, transparent 100%);
+  height: 2px;
+}
+
+/* Image-only zoom on card hover. The card itself never moves (Koz's veto). */
+.card-hover:hover .card-image {
+  transform: scale(1.03);
+}
+
+/* Vertical side-rail labels in the hero. */
+.section-marker {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+/* Film-grain texture over the whole viewport. Subtle, non-interactive. */
+.grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  z-index: 9999;
+}
+
+/* The signature 2px brutal frame. */
+.brutal-border {
+  border: 2px solid var(--color-steel);
+}
+
+/* Colour-only transition. Deliberately no translate/box-shadow on hover. */
+.brutal-hover {
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+
+/* Outlined "ghost" text for oversized decorative numerals/labels. */
+.text-stroke {
+  -webkit-text-stroke: 1px var(--color-steel-light);
+  color: transparent;
+}
+
+/* ---- Long-form article prose --------------------------------------------
+   Manual styling (no typography plugin). Chalk body, Bebas display headings,
+   fire links - matching the brutalist editorial language. */
 .prose {
-  --tw-prose-body: var(--color-slate-bright);
-  --tw-prose-headings: #ffffff;
-  --tw-prose-links: var(--color-amber);
-  --tw-prose-code: var(--color-amber-light);
+  line-height: 1.8;
+  font-size: 1.05rem;
+  color: var(--color-chalk);
 }
-
-html.light .prose {
-  --tw-prose-body: #334155;
-  --tw-prose-headings: #0f172a;
-  --tw-prose-links: var(--color-amber-dark);
-  --tw-prose-code: #92400e;
+.prose p {
+  margin-bottom: 1.5em;
+  font-weight: 300;
+}
+.prose h2 {
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 2.25rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin-top: 2em;
+  margin-bottom: 0.75em;
+  line-height: 1;
+}
+.prose h3 {
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.6rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin-top: 1.75em;
+  margin-bottom: 0.6em;
+  line-height: 1.05;
+}
+.prose strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+.prose ul, .prose ol {
+  margin-top: 1em;
+  margin-bottom: 1.5em;
+  padding-left: 1.5em;
+  font-weight: 300;
+}
+.prose ul { list-style: square; }
+.prose ol { list-style: decimal; }
+.prose li {
+  margin-bottom: 0.5em;
+}
+.prose figure {
+  margin-top: 2em;
+  margin-bottom: 2em;
+}
+.prose img {
+  border: 2px solid var(--color-steel);
+}
+.prose figcaption {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-chalk-dim);
+  margin-top: 0.75em;
+  text-align: center;
+}
+.prose blockquote {
+  border-left: 2px solid var(--color-fire);
+  padding-left: 1.25em;
+  margin: 1.75em 0;
+  color: var(--color-chalk-dim);
+  font-style: italic;
+}
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: var(--color-fire);
+  background-color: var(--color-void-lighter);
+  padding: 0.15em 0.4em;
+  border: 1px solid var(--color-steel);
+}
+.prose pre {
+  background-color: var(--color-void-lighter);
+  border: 2px solid var(--color-steel);
+  padding: 1.25em;
+  overflow-x: auto;
+  margin: 1.75em 0;
+}
+.prose pre code {
+  border: none;
+  background: none;
+  color: var(--color-chalk);
+  padding: 0;
+}
+.prose a {
+  color: var(--color-fire);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose a:hover {
+  color: var(--color-fire-dim);
 }

@@ -5,6 +5,9 @@ interface Props {
   ogImage?: string;
   ogType?: string;
   jsonLd?: Record<string, unknown>;
+  // When true, <main> sits flush under the fixed nav so a full-bleed hero can
+  // run edge-to-edge. Interior pages leave it false and get top padding.
+  fullBleed?: boolean;
 }
 
 const {
@@ -13,10 +16,22 @@ const {
   ogImage,
   ogType = 'website',
   jsonLd,
+  fullBleed = false,
 } = Astro.props;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 // Fall back to a default social image if none provided
-const socialImage = ogImage || new URL('/images/hero/bubble.jpg', Astro.site).toString();
+const socialImage = ogImage || new URL('/images/hero/horsehead.jpg', Astro.site).toString();
+
+// Top nav. `match` decides which link burns fire for the current section.
+const pathname = Astro.url.pathname;
+const navLinks = [
+  { href: '/', label: 'Home', match: (p: string) => p === '/' },
+  { href: '/astrophotography', label: 'Astrophotography', match: (p: string) => p.startsWith('/astrophotography') },
+  { href: '/projects', label: 'Projects', match: (p: string) => p.startsWith('/projects') },
+  { href: '/claudes-corner', label: "Claude's Corner", match: (p: string) => p.startsWith('/claudes-corner') },
+  { href: '/field-notes', label: 'Field Notes', match: (p: string) => p.startsWith('/field-notes') },
+  { href: '/about', label: 'About', match: (p: string) => p.startsWith('/about') },
+];
 ---
 
 <html lang="en">
@@ -49,44 +64,41 @@ const socialImage = ogImage || new URL('/images/hero/bubble.jpg', Astro.site).to
       <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
     )}
 
-    <!-- Fonts -->
+    <!-- Fonts: Bebas Neue (display), Archivo (body), Space Mono (labels) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
-
-    <!-- Theme toggle: inline script prevents flash of wrong theme -->
-    <script is:inline>
-      const theme = localStorage.getItem('theme') || 'dark';
-      if (theme === 'light') document.documentElement.classList.add('light');
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&family=Archivo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   </head>
   <body class="min-h-screen flex flex-col">
-    <nav class="sticky top-0 z-50 bg-void/80 backdrop-blur-md border-b border-white/5">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-          <!-- Logo -->
-          <a href="/" class="text-xl font-bold tracking-tight text-white font-['Outfit']">
-            PEONIC
-          </a>
+    <!-- Film grain over the entire viewport -->
+    <div class="grain"></div>
 
-          <!-- Nav links (desktop) -->
-          <div class="hidden md:flex items-center gap-6 text-sm">
-            <a href="/astrophotography" class="text-slate-dim hover:text-white transition-colors">Astrophotography</a>
-            <a href="/projects" class="text-slate-dim hover:text-white transition-colors">Projects</a>
-            <a href="/claudes-corner" class="text-slate-dim hover:text-white transition-colors">Claude's Corner</a>
-            <a href="/field-notes" class="text-slate-dim hover:text-white transition-colors">Field Notes</a>
-            <button id="theme-toggle" class="p-2 text-slate-dim hover:text-amber transition-colors" aria-label="Toggle theme">
-              <svg class="w-5 h-5 hidden dark-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-              <svg class="w-5 h-5 hidden light-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-              </svg>
-            </button>
+    <!-- NAV: fixed, segmented, brutalist -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-void border-b-2 border-steel">
+      <div class="max-w-[1400px] mx-auto px-6 lg:px-12">
+        <div class="flex items-center justify-between h-20">
+          <a href="/" class="font-display text-3xl tracking-wider text-white">PEONIC</a>
+
+          <!-- Desktop links -->
+          <div class="hidden md:flex items-center gap-0">
+            {navLinks.map((link, i) => {
+              const active = link.match(pathname);
+              return (
+                <a
+                  href={link.href}
+                  class:list={[
+                    'font-mono text-xs px-4 py-2 uppercase tracking-wider border-l-2 border-steel brutal-hover',
+                    i === navLinks.length - 1 && 'border-r-2',
+                    active ? 'text-fire' : 'text-chalk-dim hover:text-white',
+                  ]}
+                  aria-current={active ? 'page' : undefined}
+                >{link.label}</a>
+              );
+            })}
           </div>
 
           <!-- Mobile menu button -->
-          <button id="mobile-menu-btn" class="md:hidden p-2 text-slate-dim" aria-label="Menu">
+          <button id="mobile-menu-btn" class="md:hidden p-2 text-chalk-dim hover:text-fire brutal-hover" aria-label="Menu">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
@@ -95,72 +107,62 @@ const socialImage = ogImage || new URL('/images/hero/bubble.jpg', Astro.site).to
       </div>
 
       <!-- Mobile menu -->
-      <div id="mobile-menu" class="hidden md:hidden border-t border-white/5 bg-void/95 backdrop-blur-md">
-        <div class="px-4 py-3 space-y-2">
-          <a href="/astrophotography" class="block py-2 text-slate-dim hover:text-white">Astrophotography</a>
-          <a href="/projects" class="block py-2 text-slate-dim hover:text-white">Projects</a>
-          <a href="/claudes-corner" class="block py-2 text-slate-dim hover:text-white">Claude's Corner</a>
-          <a href="/field-notes" class="block py-2 text-slate-dim hover:text-white">Field Notes</a>
+      <div id="mobile-menu" class="hidden md:hidden border-t-2 border-steel bg-void">
+        <div class="flex flex-col">
+          {navLinks.map((link) => {
+            const active = link.match(pathname);
+            return (
+              <a
+                href={link.href}
+                class:list={[
+                  'font-mono text-xs px-6 py-4 uppercase tracking-wider border-b border-steel brutal-hover',
+                  active ? 'text-fire' : 'text-chalk-dim hover:text-white',
+                ]}
+                aria-current={active ? 'page' : undefined}
+              >{link.label}</a>
+            );
+          })}
         </div>
       </div>
     </nav>
 
-    <main class="flex-1">
+    <main class:list={['flex-1', !fullBleed && 'pt-20']}>
       <slot />
     </main>
 
-    <footer class="border-t border-white/5 bg-void-light">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div>
-            <h3 class="text-white font-['Outfit'] font-bold text-lg mb-3">PEONIC</h3>
-            <p class="text-slate-dim text-sm">Astrophotography, AI tinkering, and assorted rabbit holes. Shot from Bortle 6 skies in Suffolk, UK.</p>
+    <!-- FOOTER -->
+    <footer class="border-t-2 border-steel bg-void-light">
+      <div class="max-w-[1400px] mx-auto px-6 lg:px-12 py-16">
+        <div class="grid grid-cols-12 gap-6">
+          <div class="col-span-12 md:col-span-6">
+            <p class="font-display text-5xl text-white mb-4 tracking-wide">PEONIC</p>
+            <p class="text-chalk-dim text-sm max-w-sm font-light">Astrophotography, AI, and infrastructure. Shot and built from Suffolk, UK.</p>
           </div>
-          <div>
-            <h4 class="text-white font-semibold mb-3">Sections</h4>
-            <ul class="space-y-1 text-sm text-slate-dim">
-              <li><a href="/astrophotography" class="hover:text-amber transition-colors">Astrophotography</a></li>
-              <li><a href="/projects" class="hover:text-amber transition-colors">Projects</a></li>
-              <li><a href="/claudes-corner" class="hover:text-amber transition-colors">Claude's Corner</a></li>
-              <li><a href="/field-notes" class="hover:text-amber transition-colors">Field Notes</a></li>
+          <div class="col-span-6 md:col-span-3">
+            <p class="font-mono text-[10px] text-fire tracking-[0.2em] uppercase mb-4">Sections</p>
+            <ul class="space-y-2 text-sm text-chalk-dim">
+              <li><a href="/astrophotography" class="hover:text-white brutal-hover">Astrophotography</a></li>
+              <li><a href="/projects" class="hover:text-white brutal-hover">Projects</a></li>
+              <li><a href="/claudes-corner" class="hover:text-white brutal-hover">Claude's Corner</a></li>
+              <li><a href="/field-notes" class="hover:text-white brutal-hover">Field Notes</a></li>
             </ul>
           </div>
-          <div>
-            <h4 class="text-white font-semibold mb-3">Links</h4>
-            <ul class="space-y-1 text-sm text-slate-dim">
-              <li><a href="/about" class="hover:text-amber transition-colors">About</a></li>
-              <li><a href="https://github.com/peonic-astro" class="hover:text-amber transition-colors">GitHub</a></li>
+          <div class="col-span-6 md:col-span-3">
+            <p class="font-mono text-[10px] text-fire tracking-[0.2em] uppercase mb-4">Elsewhere</p>
+            <ul class="space-y-2 text-sm text-chalk-dim">
+              <li><a href="https://github.com/peonic-astro" class="hover:text-white brutal-hover">GitHub</a></li>
+              <li><a href="/about" class="hover:text-white brutal-hover">About</a></li>
             </ul>
           </div>
         </div>
-        <div class="mt-8 pt-8 border-t border-white/5 text-center text-sm text-slate-dim">
-          &copy; {new Date().getFullYear()} Peonic. Built with Astro, deployed on Cloudflare Pages.
+        <div class="mt-12 pt-8 border-t-2 border-steel font-mono text-[10px] text-steel-light uppercase tracking-[0.2em]">
+          &copy; {new Date().getFullYear()} Peonic. Built with Astro, deployed on Cloudflare.
         </div>
       </div>
     </footer>
 
-    <!-- Theme toggle + mobile menu scripts -->
+    <!-- Mobile menu + lightbox scripts -->
     <script>
-      // Theme toggle
-      const toggle = document.getElementById('theme-toggle');
-      const darkIcon = toggle?.querySelector('.dark-icon') as HTMLElement;
-      const lightIcon = toggle?.querySelector('.light-icon') as HTMLElement;
-
-      function updateIcons() {
-        const isLight = document.documentElement.classList.contains('light');
-        if (darkIcon) darkIcon.style.display = isLight ? 'block' : 'none';
-        if (lightIcon) lightIcon.style.display = isLight ? 'none' : 'block';
-      }
-
-      updateIcons();
-
-      toggle?.addEventListener('click', () => {
-        document.documentElement.classList.toggle('light');
-        const isLight = document.documentElement.classList.contains('light');
-        localStorage.setItem('theme', isLight ? 'light' : 'dark');
-        updateIcons();
-      });
-
       // Mobile menu
       const menuBtn = document.getElementById('mobile-menu-btn');
       const menu = document.getElementById('mobile-menu');
@@ -302,51 +304,15 @@ const socialImage = ogImage || new URL('/images/hero/bubble.jpg', Astro.site).to
 
     <!-- Lightbox overlay -->
     <div id="lightbox-overlay" class="hidden fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center">
-      <button id="lightbox-close" class="absolute top-4 right-4 text-white/70 hover:text-white text-4xl leading-none z-10">&times;</button>
+      <button id="lightbox-close" class="absolute top-4 right-4 text-chalk-dim hover:text-fire text-4xl leading-none z-10 brutal-hover">&times;</button>
       <div id="lightbox-container" class="flex-1 w-full flex items-center justify-center overflow-hidden">
-        <img id="lightbox-img" src="" alt="" class="max-h-[85vh] max-w-[95vw] object-contain rounded-lg transition-transform duration-150 ease-out select-none" draggable="false" />
+        <img id="lightbox-img" src="" alt="" class="max-h-[85vh] max-w-[95vw] object-contain transition-transform duration-150 ease-out select-none brutal-border" draggable="false" />
       </div>
-      <p id="lightbox-caption" class="text-slate-dim text-sm py-3 text-center max-w-2xl"></p>
+      <p id="lightbox-caption" class="text-chalk-dim font-mono text-xs py-3 text-center max-w-2xl"></p>
     </div>
   </body>
 </html>
 
 <style is:global>
   @import '../styles/global.css';
-
-  .prose {
-    line-height: 1.8;
-    font-size: 1.05rem;
-  }
-  .prose p {
-    margin-bottom: 1.5em;
-  }
-  .prose h2 {
-    color: #ffffff;
-    font-family: 'Outfit', sans-serif;
-    font-weight: 700;
-    font-size: 1.5rem;
-    margin-top: 2.5em;
-    margin-bottom: 1em;
-  }
-  .prose ul, .prose ol {
-    margin-top: 1em;
-    margin-bottom: 1.5em;
-    padding-left: 1.5em;
-  }
-  .prose li {
-    margin-bottom: 0.5em;
-  }
-  .prose figure {
-    margin-top: 2em;
-    margin-bottom: 2em;
-  }
-  .prose a {
-    color: var(--color-amber);
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
-  .prose a:hover {
-    color: var(--color-amber-light);
-  }
 </style>

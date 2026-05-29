@@ -1,13 +1,25 @@
 ---
+// Editorial section shell: a 12-col grid with a sticky fire eyebrow pinned in
+// the left rail and the display title, subtitle, and slotted content (the post
+// grid or list) filling the right ten columns. Mirrors mockup #7's sections.
 interface Props {
   title: string;
   subtitle?: string;
+  eyebrow?: string;
 }
 
-const { title, subtitle } = Astro.props;
+const { title, subtitle, eyebrow } = Astro.props;
 ---
 
-<div class="mb-8">
-  <h1 class="text-4xl md:text-5xl font-['Outfit'] font-bold text-white mb-3">{title}</h1>
-  {subtitle && <p class="text-slate-dim text-lg max-w-2xl">{subtitle}</p>}
-</div>
+<section class="max-w-[1400px] mx-auto px-6 lg:px-12 py-16 md:py-24">
+  <div class="grid grid-cols-12 gap-6">
+    <div class="col-span-12 md:col-span-2">
+      <p class="font-mono text-[10px] text-fire tracking-[0.3em] uppercase md:sticky md:top-24">{eyebrow || title}</p>
+    </div>
+    <div class="col-span-12 md:col-span-10">
+      <h1 class="font-display text-6xl md:text-8xl text-white mb-4 uppercase tracking-wide leading-[0.85]">{title}</h1>
+      {subtitle && <p class="text-chalk-dim text-lg mb-12 md:mb-16 max-w-2xl font-light">{subtitle}</p>}
+      <slot />
+    </div>
+  </div>
+</section>
