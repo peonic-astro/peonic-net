@@ -149,7 +149,10 @@ body {
   margin-bottom: 2em;
 }
 .prose img {
+  /* Force sharp brutalist frames on in-content images. The MDX markup carries
+     a `rounded-xl` class we must not edit, so we override the radius here. */
   border: 2px solid var(--color-steel);
+  border-radius: 0;
 }
 .prose figcaption {
   font-family: var(--font-mono);

@@ -22,24 +22,41 @@ const jsonLd = {
   ...(d.hero_image ? { image: new URL(d.hero_image, Astro.site).toString() } : {}),
 };
 const ogImage = d.hero_image ? new URL(d.hero_image, Astro.site).toString() : undefined;
+
+// Brutalist status pill per project state.
+const statusBadge: Record<string, string> = {
+  active: 'bg-emerald-500/10 text-emerald-400 border-2 border-emerald-500/30',
+  complete: 'bg-sky-500/10 text-sky-400 border-2 border-sky-500/30',
+  archived: 'bg-steel/30 text-chalk-dim border-2 border-steel',
+  planned: 'bg-fire/10 text-fire border-2 border-fire/30',
+};
 ---
 
 <BaseLayout title={d.title} description={d.description} ogImage={ogImage} ogType="article" jsonLd={jsonLd}>
-  {d.hero_image && (
-    <div class="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
-      <div class="rounded-xl overflow-hidden aspect-[3/1]">
+  <article class="max-w-4xl mx-auto px-6 lg:px-12 py-16">
+    <header class="mb-12">
+      <p class="font-mono text-xs text-fire tracking-[0.3em] uppercase mb-6">Projects</p>
+      <div class="flex flex-wrap items-center gap-4 mb-6">
+        <h1 class="font-display text-5xl md:text-7xl text-white uppercase tracking-wide leading-[0.9]">{d.title}</h1>
+        <span class={`font-mono text-[10px] px-2 py-0.5 uppercase ${statusBadge[d.status]}`}>{d.status}</span>
+      </div>
+      <div class="editorial-line w-24 mb-6"></div>
+      {d.tech.length > 0 && (
+        <div class="flex flex-wrap gap-2">
+          {d.tech.map((t: string) => (
+            <span class="font-mono text-[10px] px-2 py-1 bg-steel/50 text-chalk-dim border border-steel uppercase tracking-wider">{t}</span>
+          ))}
+        </div>
+      )}
+    </header>
+
+    {d.hero_image && (
+      <div class="aspect-[3/1] overflow-hidden brutal-border mb-12">
         <img src={d.hero_image} alt={d.title} class="w-full h-full object-cover" />
       </div>
-    </div>
-  )}
-  <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <h1 class="text-4xl md:text-5xl font-['Outfit'] font-bold text-white mb-4">{d.title}</h1>
-    <div class="flex flex-wrap gap-3 mb-8">
-      {d.tech.map((t: string) => (
-        <span class="text-xs bg-void-light border border-white/10 rounded-full px-3 py-1 text-slate-dim">{t}</span>
-      ))}
-    </div>
-    <div class="prose prose-invert max-w-none">
+    )}
+
+    <div class="prose max-w-none">
       <Content />
     </div>
   </article>

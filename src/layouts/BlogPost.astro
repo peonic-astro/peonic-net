@@ -7,38 +7,37 @@ interface Props {
   hero_image?: string;
   tags?: string[];
   jsonLd?: Record<string, unknown>;
+  // Section label shown as the fire eyebrow above the title.
+  eyebrow?: string;
 }
 
 import BaseLayout from './BaseLayout.astro';
 
-const { title, description, date, hero_image, tags = [], jsonLd } = Astro.props;
+const { title, description, date, hero_image, tags = [], jsonLd, eyebrow } = Astro.props;
 const ogImage = hero_image ? new URL(hero_image, Astro.site).toString() : undefined;
 ---
 
 <BaseLayout title={title} description={description} ogImage={ogImage} ogType="article" jsonLd={jsonLd}>
-  <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    {hero_image && (
-      <div class="rounded-xl overflow-hidden mb-8 aspect-[3/1]">
-        <img src={hero_image} alt={title} class="w-full h-full object-cover" />
-      </div>
-    )}
-    <header class="mb-8">
-      <h1 class="text-4xl md:text-5xl font-['Outfit'] font-bold text-white mb-4">{title}</h1>
-      <div class="flex flex-wrap items-center gap-3 text-sm text-slate-dim">
+  <article class="max-w-3xl mx-auto px-6 lg:px-12 py-16">
+    <header class="mb-12">
+      {eyebrow && <p class="font-mono text-xs text-fire tracking-[0.3em] uppercase mb-6">{eyebrow}</p>}
+      <h1 class="font-display text-5xl md:text-7xl text-white mb-6 uppercase tracking-wide leading-[0.9]">{title}</h1>
+      <div class="editorial-line w-24 mb-6"></div>
+      <div class="flex flex-wrap items-center gap-3 font-mono text-xs text-steel-light">
         <time datetime={date.toISOString()}>
           {date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
         </time>
-        {tags.length > 0 && (
-          <>
-            <span>&middot;</span>
-            {tags.map(tag => (
-              <span class="bg-void-light rounded-full px-2 py-0.5 text-xs">{tag}</span>
-            ))}
-          </>
-        )}
+        {tags.map(tag => (
+          <span class="px-2 py-1 border border-steel text-chalk-dim uppercase tracking-wider">{tag}</span>
+        ))}
       </div>
     </header>
-    <div class="prose prose-invert max-w-none">
+    {hero_image && (
+      <div class="aspect-[3/1] overflow-hidden brutal-border mb-12">
+        <img src={hero_image} alt={title} class="w-full h-full object-cover" />
+      </div>
+    )}
+    <div class="prose max-w-none">
       <slot />
     </div>
   </article>
