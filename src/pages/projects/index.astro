@@ -6,51 +6,53 @@ import { getCollection } from 'astro:content';
 const posts = (await getCollection('projects', ({ data }) => !data.draft))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
-const statusColors: Record<string, string> = {
-  active: 'bg-emerald-500/20 text-emerald-400',
-  complete: 'bg-sky-500/20 text-sky-400',
-  archived: 'bg-slate-500/20 text-slate-400',
-  planned: 'bg-amber/20 text-amber',
+// Brutalist status pill per project state.
+const statusBadge: Record<string, string> = {
+  active: 'bg-emerald-500/10 text-emerald-400 border-2 border-emerald-500/30',
+  complete: 'bg-sky-500/10 text-sky-400 border-2 border-sky-500/30',
+  archived: 'bg-steel/30 text-chalk-dim border-2 border-steel',
+  planned: 'bg-fire/10 text-fire border-2 border-fire/30',
 };
 ---
 
 <BaseLayout title="Projects" description="AI tinkering, smart home builds, and assorted rabbit holes.">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <SectionHeader
-      title="Projects"
-      subtitle="AI tinkering, smart home builds, and whatever rabbit hole I've fallen into this week."
-    />
-
+  <SectionHeader
+    title="Projects"
+    subtitle="AI tinkering, smart home builds, and whatever rabbit hole I've fallen into this week."
+  >
     {posts.length > 0 ? (
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="divide-y-2 divide-steel">
         {posts.map(post => (
-          <a href={`/projects/${post.id}`} class="group block bg-void-light rounded-lg border border-white/5 hover:border-amber/30 transition-all overflow-hidden">
-            {post.data.hero_image && (
-              <div class="aspect-[3/1] overflow-hidden">
-                <img src={post.data.hero_image} alt={post.data.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-              </div>
-            )}
-            <div class="p-6">
-              <div class="flex items-center gap-3 mb-3">
-                <h3 class="text-white font-semibold text-lg group-hover:text-amber transition-colors">{post.data.title}</h3>
-                <span class={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColors[post.data.status]}`}>
-                  {post.data.status}
-                </span>
-              </div>
-              <p class="text-slate-dim text-sm mb-3">{post.data.description}</p>
-              {post.data.tech.length > 0 && (
-                <div class="flex flex-wrap gap-2">
-                  {post.data.tech.map((t: string) => (
-                    <span class="text-xs bg-void rounded px-2 py-1 text-slate-dim">{t}</span>
-                  ))}
+          <a href={`/projects/${post.id}`} class="group block py-8 card-hover brutal-hover">
+            <div class="grid grid-cols-12 gap-6 items-start">
+              {post.data.hero_image && (
+                <div class="col-span-12 md:col-span-4 overflow-hidden brutal-border">
+                  <img src={post.data.hero_image} alt={post.data.title} class="card-image w-full aspect-[16/10] object-cover transition-transform duration-500" loading="lazy" />
                 </div>
               )}
+              <div class="col-span-12 md:col-span-6">
+                <div class="flex items-center gap-3 mb-2">
+                  <h3 class="font-display text-3xl text-white group-hover:text-fire transition-colors uppercase tracking-wide leading-none">{post.data.title}</h3>
+                  <span class={`font-mono text-[10px] px-2 py-0.5 uppercase ${statusBadge[post.data.status]}`}>{post.data.status}</span>
+                </div>
+                <p class="text-chalk-dim text-sm leading-relaxed mb-4 font-light">{post.data.description}</p>
+                {post.data.tech.length > 0 && (
+                  <div class="flex flex-wrap gap-2">
+                    {post.data.tech.map((t: string) => (
+                      <span class="font-mono text-[10px] px-2 py-1 bg-steel/50 text-chalk-dim border border-steel">{t}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div class="col-span-12 md:col-span-2 md:text-right">
+                <time class="font-mono text-[10px] text-steel-light" datetime={post.data.date.toISOString()}>{post.data.date.getFullYear()}</time>
+              </div>
             </div>
           </a>
         ))}
       </div>
     ) : (
-      <p class="text-slate-dim text-lg py-20 text-center">Projects showcase coming soon.</p>
+      <p class="font-mono text-sm text-chalk-dim py-20 text-center uppercase tracking-wider">Projects showcase coming soon.</p>
     )}
-  </div>
+  </SectionHeader>
 </BaseLayout>

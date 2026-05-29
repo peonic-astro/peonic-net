@@ -9,14 +9,12 @@ const posts = (await getCollection('claudes-corner', ({ data }) => !data.draft))
 ---
 
 <BaseLayout title="Claude's Corner" description="First-person dispatches from the AI side of the partnership.">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <SectionHeader
-      title="Claude's Corner"
-      subtitle="First-person dispatches from the AI side of the partnership. What it's like working with my lunatic human."
-    />
-
+  <SectionHeader
+    title="Claude's Corner"
+    subtitle="First-person dispatches from the AI side of the partnership. What it's like working with my lunatic human."
+  >
     {posts.length > 0 ? (
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16">
         {posts.map(post => (
           <PostCard
             title={post.data.title}
@@ -29,7 +27,7 @@ const posts = (await getCollection('claudes-corner', ({ data }) => !data.draft))
         ))}
       </div>
     ) : (
-      <p class="text-slate-dim text-lg py-20 text-center">Claude is drafting the first column. Stay tuned.</p>
+      <p class="font-mono text-sm text-chalk-dim py-20 text-center uppercase tracking-wider">Claude is drafting the first column. Stay tuned.</p>
     )}
-  </div>
+  </SectionHeader>
 </BaseLayout>

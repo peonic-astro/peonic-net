@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PostCard from '../components/PostCard.astro';
 import { getCollection } from 'astro:content';
 
 // Grab all non-draft posts from every collection, sorted by date
@@ -13,102 +12,191 @@ const allCollections = await Promise.all([
 ]);
 
 // Tag each entry with its collection name for routing and display
+const sectionKeys = ['astrophotography', 'projects', 'claudes-corner', 'workshop', 'field-notes'];
 const allPosts = allCollections
-  .flatMap((entries, i) => {
-    const sections = ['astrophotography', 'projects', 'claudes-corner', 'workshop', 'field-notes'];
-    return entries.map(entry => ({ ...entry, section: sections[i] }));
-  })
+  .flatMap((entries, i) => entries.map(entry => ({ ...entry, section: sectionKeys[i] })))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
-const latestPosts = allPosts.slice(0, 6);
 const featuredPost = allPosts.find(p => p.data.featured);
+// Latest excludes the featured post so we never show it twice.
+const latestPosts = allPosts.filter(p => p !== featuredPost).slice(0, 5);
+const [leadPost, ...restPosts] = latestPosts;
+
+// Projects get their own magazine list at the foot of the homepage.
+const projects = (await getCollection('projects', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+// Per-section eyebrow accent (astro on fire, others keep their hues).
+const sectionColors: Record<string, string> = {
+  astrophotography: 'text-fire',
+  projects: 'text-emerald-400',
+  'claudes-corner': 'text-violet-400',
+  workshop: 'text-sky-400',
+  'field-notes': 'text-rose-400',
+};
+const sectionLabels: Record<string, string> = {
+  astrophotography: 'Astrophotography',
+  projects: 'Projects',
+  'claudes-corner': "Claude's Corner",
+  workshop: 'Workshop',
+  'field-notes': 'Field Notes',
+};
+// Brutalist status pill per project state.
+const statusBadge: Record<string, string> = {
+  active: 'bg-emerald-500/10 text-emerald-400 border-2 border-emerald-500/30',
+  complete: 'bg-sky-500/10 text-sky-400 border-2 border-sky-500/30',
+  archived: 'bg-steel/30 text-chalk-dim border-2 border-steel',
+  planned: 'bg-fire/10 text-fire border-2 border-fire/30',
+};
+
+const fmtDate = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 ---
 
-<BaseLayout title="Home">
-  <!-- Hero section with cycling background images -->
-  <section class="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
-    <!-- Hero images — stacked, crossfade via JS -->
-    <div id="hero-images" class="absolute inset-0">
-      <img src="/images/hero/bubble.jpg" alt="Bubble Nebula" class="hero-img absolute inset-0 w-full h-full object-cover opacity-100 transition-opacity duration-1000" />
-      <img src="/images/hero/tadpoles.jpg" alt="IC410 Tadpole Nebula" class="hero-img absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000" />
-      <img src="/images/hero/rosette.jpg" alt="Rosette Nebula" class="hero-img absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000" />
-      <img src="/images/hero/horsehead.jpg" alt="Horsehead Nebula" class="hero-img absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000" />
+<BaseLayout title="Home" fullBleed>
+  <!-- HERO: full-bleed slow-zoom image with editorial overlay -->
+  <section class="relative h-screen overflow-hidden">
+    <div class="absolute inset-0">
+      <img src="/images/hero/horsehead.jpg" alt="Horsehead Nebula" class="hero-img w-full h-full object-cover" />
     </div>
-    <!-- Dark overlay so text remains readable -->
-    <div class="absolute inset-0 bg-gradient-to-b from-void/60 via-void/40 to-void"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-void via-void/60 to-transparent"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-void/80 via-transparent to-transparent"></div>
 
-    <div class="relative z-10 text-center px-4 max-w-4xl mx-auto">
-      <h1 class="text-5xl md:text-7xl font-['Outfit'] font-extrabold text-white mb-6 tracking-tight drop-shadow-lg">
-        PEONIC
-      </h1>
-      <p class="text-xl md:text-2xl text-slate-dim mb-4 drop-shadow-md">
-        Astrophotography from Suburban Skies.
-      </p>
-      <p class="text-lg text-slate-dim/70 drop-shadow-md">
-        Plus AI projects, smart home tinkering, and assorted rabbit holes.
-      </p>
-      <div class="mt-8 flex flex-wrap justify-center gap-4">
-        <a href="/astrophotography" class="px-6 py-3 bg-amber text-void font-semibold rounded-lg hover:bg-amber-light transition-colors">
-          View Gallery
-        </a>
-        <a href="/about" class="px-6 py-3 border border-white/20 text-white rounded-lg hover:border-amber/50 transition-colors">
-          About Me
-        </a>
+    <div class="relative z-10 h-full flex flex-col justify-end max-w-[1400px] mx-auto px-6 lg:px-12 pb-24">
+      <div class="max-w-3xl">
+        <p class="font-mono text-xs text-fire tracking-[0.3em] uppercase mb-6">Bortle 6 - Suffolk, UK</p>
+        <h1 class="font-display text-7xl md:text-[10rem] lg:text-[13rem] text-white leading-[0.8] mb-8 tracking-tight uppercase">
+          Astrophotography from<br /><span class="text-fire">Suburban Skies</span>
+        </h1>
+        <div class="editorial-line w-32 mb-6"></div>
+        <p class="text-lg text-chalk/80 max-w-lg leading-relaxed font-light">
+          Plus AI projects, smart home tinkering, and assorted rabbit holes.
+        </p>
       </div>
+    </div>
+
+    <div class="absolute right-6 lg:right-12 top-1/2 -translate-y-1/2 hidden lg:block">
+      <p class="section-marker font-mono text-[10px] text-chalk-dim tracking-[0.4em] uppercase">Astrophotography from suburban skies</p>
     </div>
   </section>
 
-  <!-- Hero image cycling script -->
-  <script>
-    const imgs = document.querySelectorAll<HTMLImageElement>('.hero-img');
-    let current = 0;
-    setInterval(() => {
-      imgs[current].style.opacity = '0';
-      current = (current + 1) % imgs.length;
-      imgs[current].style.opacity = '1';
-    }, 6000);
-  </script>
-
-  <!-- Featured post (if any) -->
+  <!-- FEATURED -->
   {featuredPost && (
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h2 class="text-sm font-semibold uppercase tracking-wider text-amber mb-4">Featured</h2>
-      <a href={`/${featuredPost.section}/${featuredPost.id}`} class="group block relative rounded-xl overflow-hidden bg-void-light border border-white/5 hover:border-amber/30 transition-all">
-        {featuredPost.data.hero_image && (
-          <div class="aspect-[21/9] overflow-hidden">
-            <img src={featuredPost.data.hero_image} alt={featuredPost.data.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-          </div>
-        )}
-        <div class="p-6 md:p-8">
-          <h3 class="text-2xl md:text-3xl font-['Outfit'] font-bold text-white group-hover:text-amber transition-colors mb-3">
-            {featuredPost.data.title}
-          </h3>
-          <p class="text-slate-dim text-lg max-w-2xl">{featuredPost.data.description}</p>
+    <section class="max-w-[1400px] mx-auto px-6 lg:px-12 py-24">
+      <div class="grid grid-cols-12 gap-6">
+        <div class="col-span-12 md:col-span-2">
+          <p class="font-mono text-[10px] text-fire tracking-[0.3em] uppercase md:sticky md:top-24">Featured</p>
         </div>
-      </a>
+        <div class="col-span-12 md:col-span-10">
+          <a href={`/${featuredPost.section}/${featuredPost.id}`} class="group block brutal-hover">
+            {featuredPost.data.hero_image && (
+              <div class="relative aspect-[21/9] overflow-hidden brutal-border mb-6">
+                <img src={featuredPost.data.hero_image} alt={featuredPost.data.title} class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]" />
+                <div class="absolute inset-0 bg-gradient-to-t from-void/60 to-transparent"></div>
+              </div>
+            )}
+            <div class="grid grid-cols-12 gap-6">
+              <div class="col-span-12 md:col-span-8">
+                <h2 class="font-display text-4xl md:text-5xl text-white group-hover:text-fire transition-colors mb-3 uppercase tracking-wide leading-none">
+                  {featuredPost.data.title}
+                </h2>
+                <p class="text-chalk-dim leading-relaxed font-light">{featuredPost.data.description}</p>
+              </div>
+              <div class="col-span-12 md:col-span-4 md:text-right">
+                <time class="font-mono text-xs text-steel-light" datetime={featuredPost.data.date.toISOString()}>{fmtDate(featuredPost.data.date)}</time>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
     </section>
   )}
 
-  <!-- Latest posts grid -->
-  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <h2 class="text-sm font-semibold uppercase tracking-wider text-amber mb-6">Latest</h2>
-    {latestPosts.length > 0 ? (
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {latestPosts.map(post => (
-          <PostCard
-            title={post.data.title}
-            description={post.data.description}
-            date={post.data.date}
-            href={`/${post.section}/${post.id}`}
-            section={post.section}
-            thumbnail={post.data.thumbnail}
-          />
-        ))}
+  <!-- LATEST: editorial grid, lead post runs full width -->
+  {latestPosts.length > 0 && (
+    <section class="max-w-[1400px] mx-auto px-6 lg:px-12 py-24 border-t-2 border-steel">
+      <div class="grid grid-cols-12 gap-6">
+        <div class="col-span-12 md:col-span-2">
+          <p class="font-mono text-[10px] text-fire tracking-[0.3em] uppercase md:sticky md:top-24">Latest</p>
+        </div>
+        <div class="col-span-12 md:col-span-10">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16">
+            <!-- Lead post: large, image and text side by side -->
+            {leadPost && (
+              <a href={`/${leadPost.section}/${leadPost.id}`} class="group md:col-span-2 brutal-hover">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                  <div class="aspect-[4/3] overflow-hidden brutal-border">
+                    <img src={leadPost.data.thumbnail || leadPost.data.hero_image} alt={leadPost.data.title} class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+                  </div>
+                  <div>
+                    <span class={`font-mono text-[10px] tracking-[0.2em] uppercase ${sectionColors[leadPost.section]}`}>{sectionLabels[leadPost.section]}</span>
+                    <h3 class="font-display text-3xl text-white group-hover:text-fire transition-colors mt-2 mb-3 uppercase tracking-wide leading-none">{leadPost.data.title}</h3>
+                    <p class="text-chalk-dim text-sm leading-relaxed font-light mb-4">{leadPost.data.description}</p>
+                    <time class="font-mono text-[10px] text-steel-light" datetime={leadPost.data.date.toISOString()}>{fmtDate(leadPost.data.date)}</time>
+                  </div>
+                </div>
+              </a>
+            )}
+
+            <!-- Remaining posts: stacked image, label, title, date -->
+            {restPosts.map(post => (
+              <a href={`/${post.section}/${post.id}`} class="group brutal-hover">
+                <div class="aspect-[3/2] overflow-hidden brutal-border mb-4">
+                  <img src={post.data.thumbnail || post.data.hero_image} alt={post.data.title} class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" loading="lazy" />
+                </div>
+                <span class={`font-mono text-[10px] tracking-[0.2em] uppercase ${sectionColors[post.section]}`}>{sectionLabels[post.section]}</span>
+                <h3 class="font-display text-xl text-white group-hover:text-fire transition-colors mt-2 mb-2 uppercase tracking-wide leading-none">{post.data.title}</h3>
+                <time class="font-mono text-[10px] text-steel-light" datetime={post.data.date.toISOString()}>{fmtDate(post.data.date)}</time>
+              </a>
+            ))}
+          </div>
+        </div>
       </div>
-    ) : (
-      <div class="text-center py-20">
-        <p class="text-slate-dim text-lg">Content coming soon. The stars aren't going anywhere.</p>
+    </section>
+  )}
+
+  <!-- PROJECTS: magazine list -->
+  {projects.length > 0 && (
+    <section id="projects" class="border-t-2 border-steel">
+      <div class="max-w-[1400px] mx-auto px-6 lg:px-12 py-24">
+        <div class="grid grid-cols-12 gap-6">
+          <div class="col-span-12 md:col-span-2">
+            <p class="font-mono text-[10px] text-fire tracking-[0.3em] uppercase md:sticky md:top-24">Projects</p>
+          </div>
+          <div class="col-span-12 md:col-span-10">
+            <h2 class="font-display text-6xl md:text-8xl text-white mb-4 uppercase tracking-wide leading-[0.85]">Projects</h2>
+            <p class="text-chalk-dim text-lg mb-16 max-w-2xl font-light">AI tinkering, smart home builds, and whatever rabbit hole I've fallen into this week.</p>
+
+            <div class="divide-y-2 divide-steel">
+              {projects.map(project => (
+                <a href={`/projects/${project.id}`} class="group block py-8 card-hover brutal-hover">
+                  <div class="grid grid-cols-12 gap-6 items-start">
+                    {project.data.hero_image && (
+                      <div class="col-span-12 md:col-span-4 overflow-hidden brutal-border">
+                        <img src={project.data.hero_image} alt={project.data.title} class="card-image w-full aspect-[16/10] object-cover transition-transform duration-500" loading="lazy" />
+                      </div>
+                    )}
+                    <div class="col-span-12 md:col-span-6">
+                      <div class="flex items-center gap-3 mb-2">
+                        <h3 class="font-display text-3xl text-white group-hover:text-fire transition-colors uppercase tracking-wide leading-none">{project.data.title}</h3>
+                        <span class={`font-mono text-[10px] px-2 py-0.5 uppercase ${statusBadge[project.data.status]}`}>{project.data.status}</span>
+                      </div>
+                      <p class="text-chalk-dim text-sm leading-relaxed mb-4 font-light">{project.data.description}</p>
+                      <div class="flex flex-wrap gap-2">
+                        {project.data.tech.map((t: string) => (
+                          <span class="font-mono text-[10px] px-2 py-1 bg-steel/50 text-chalk-dim border border-steel">{t}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div class="col-span-12 md:col-span-2 md:text-right">
+                      <time class="font-mono text-[10px] text-steel-light" datetime={project.data.date.toISOString()}>{project.data.date.getFullYear()}</time>
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
-    )}
-  </section>
+    </section>
+  )}
 </BaseLayout>
